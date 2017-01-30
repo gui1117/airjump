@@ -1,0 +1,36 @@
+[window]
+samples = 2
+fullscreen = true
+vsync = true
+dimensions = [640, 480]
+
+[gameplay]
+gravity = 40.0
+impulse = 25.0
+reset = true
+damping = 0.7
+ball_radius = 0.5
+
+[camera]
+zoom = 0.05
+
+[graphics]
+background_color = [1.0, 1.0, 1.0, 1.0]
+ball_color = [0.0, 0.0, 0.0, 1.0]
+wall_color = [0.0, 0.0, 0.0, 1.0]
+cursor_color = [1.0, 0.0, 0.0, 1.0]
+effect_color = [1.0, 0.0, 0.0, 1.0]
+
+cursor_inner_radius = 0.01
+cursor_outer_radius = 0.02
+cursor_thickness = 0.005
+
+effect_timer = 0.8
+effect_thickness = 0.4
+
+[event_loop]
+ups = 120
+max_fps = 60
+
+[control]
+mouse_sensibility = 1.0

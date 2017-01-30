@@ -1,0 +1,14 @@
+[package]
+name = "airjump"
+version = "0.1.0"
+authors = ["thiolliere <guillaume.thiolliere@opmbx.org>"]
+
+[dependencies]
+rustc-serialize = "*"
+toml = "*"
+piston = "*"
+piston2d-graphics = "*"
+piston2d-glium_graphics = "*"
+lazy_static = "*"
+glium = "*"
+svgparser = "*"
