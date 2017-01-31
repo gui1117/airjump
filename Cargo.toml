@@ -3,6 +3,10 @@ name = "airjump"
 version = "0.1.0"
 authors = ["thiolliere <guillaume.thiolliere@opmbx.org>"]
 
+[features]
+default = []
+include_all = [] # include map.svg and config.toml into the binary
+
 [dependencies]
 rustc-serialize = "*"
 toml = "*"
@@ -12,3 +16,5 @@ piston2d-glium_graphics = "*"
 lazy_static = "*"
 glium = "*"
 svgparser = "*"
+fnv = "*"
+glutin = "*"

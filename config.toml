@@ -5,10 +5,10 @@ vsync = true
 dimensions = [640, 480]
 
 [gameplay]
-gravity = 40.0
+gravity = 15.0
 impulse = 25.0
 reset = true
-damping = 0.7
+damping = 0.5
 ball_radius = 0.5
 
 [camera]
@@ -29,8 +29,11 @@ effect_timer = 0.8
 effect_thickness = 0.4
 
 [event_loop]
-ups = 120
+ups = 60
 max_fps = 60
 
 [control]
 mouse_sensibility = 1.0
+
+[physics]
+unit = 5.0

@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Body {
     pub pos: [f64; 2],
     pub shape: Shape,
@@ -9,9 +10,10 @@ impl Body {
     pub fn collide(&self, other: &Body) -> Option<Collision> {
         shape_collision(self.pos, &self.shape, other.pos, &other.shape)
     }
-    // pub fn cells(&self) -> Vec<[i32; 2]> {
-    //     self.shape.cells(self.pos)
-    // }
+    #[inline]
+    pub fn cells(&self, unit: f64) -> Vec<[i32; 2]> {
+        self.shape.cells(unit, self.pos)
+    }
 }
 
 /// if A collide with B then collision must represent
@@ -41,29 +43,29 @@ pub enum Shape {
     /// width and height
     Rectangle(f64, f64),
 }
-// impl Shape {
-//     fn cells(&self, pos: [f64; 2]) -> Vec<[i32; 2]> {
-//         use ::std::f64::EPSILON;
+impl Shape {
+    fn cells(&self, unit: f64, pos: [f64; 2]) -> Vec<[i32; 2]> {
+        use ::std::f64::EPSILON;
 
-//         let (w2, h2) = match *self {
-//             Shape::Circle(r) => (r, r),
-//             Shape::Rectangle(w, h) => (w / 2., h / 2.),
-//         };
+        let (w2, h2) = match *self {
+            Shape::Circle(r) => (r, r),
+            Shape::Rectangle(w, h) => (w / 2., h / 2.),
+        };
 
-//         let min_x = (pos[0] - w2 + EPSILON).floor() as i32;
-//         let max_x = (pos[0] + w2 - EPSILON).floor() as i32;
-//         let min_y = (pos[1] - h2 + EPSILON).floor() as i32;
-//         let max_y = (pos[1] + h2 - EPSILON).floor() as i32;
+        let min_x = ((pos[0] - w2 + EPSILON)/unit).floor() as i32;
+        let max_x = ((pos[0] + w2 - EPSILON)/unit).floor() as i32;
+        let min_y = ((pos[1] - h2 + EPSILON)/unit).floor() as i32;
+        let max_y = ((pos[1] + h2 - EPSILON)/unit).floor() as i32;
 
-//         let mut cells = Vec::new();
-//         for x in min_x..max_x + 1 {
-//             for y in min_y..max_y + 1 {
-//                 cells.push([x, y]);
-//             }
-//         }
-//         cells
-//     }
-// }
+        let mut cells = Vec::new();
+        for x in min_x..max_x + 1 {
+            for y in min_y..max_y + 1 {
+                cells.push([x, y]);
+            }
+        }
+        cells
+    }
+}
 
 fn shape_collision(a_pos: [f64;2], a_shape: &Shape, b_pos: [f64;2], b_shape: &Shape) -> Option<Collision> {
     use self::Shape::*;

@@ -2,12 +2,11 @@ use piston::input::{Motion, Button};
 use piston::input::mouse::MouseButton;
 use graphics::context::Context;
 use graphics::Graphics;
-use std::io::Read;
-use std::fs::File;
 use configuration::CFG;
-use error::*;
+use map::MAP;
 use math::*;
 use physics::{Body, Shape};
+use spatial_hashing::SpatialHashing;
 
 #[derive(Debug, Clone)]
 struct Effect {
@@ -17,7 +16,7 @@ struct Effect {
 }
 
 pub struct App {
-    walls: Vec<Body>,
+    walls: SpatialHashing,
     ball: Body,
     ball_vel: [f64; 2],
     ball_acc: [f64; 2],
@@ -28,24 +27,20 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> AirjumpResult<App> {
-        let mut svg_data = Vec::new();
-        File::open("map.svg")?.read_to_end(&mut svg_data)?;
-        let map = ::map::load_map(&svg_data)?;
-
-        Ok(App {
+    pub fn new() -> App {
+        App {
             ball: Body {
-                pos: map.start,
+                pos: MAP.start,
                 shape: Shape::Circle(CFG.gameplay.ball_radius),
             },
             ball_vel: [0., 0.],
             ball_acc: [0., 0.],
-            walls: map.bodies,
+            walls: SpatialHashing::new(CFG.physics.unit, &MAP.bodies),
             cursor: [0., 0.],
             window_size: CFG.window.dimensions,
             effects: vec!(),
             airjump: true,
-        })
+        }
     }
     pub fn render<G: Graphics>(&mut self, context: Context, frame: &mut G) {
         use graphics::*;
@@ -60,7 +55,12 @@ impl App {
             .flip_h()
             .trans(-self.ball.pos[0], -self.ball.pos[1]);
 
-        for b in &self.walls {
+        let field_of_view = Body {
+            pos: self.ball.pos,
+            shape: Shape::Rectangle(2./(h/w).min(1.)/CFG.camera.zoom, 2./(w/h).min(1.)/CFG.camera.zoom),
+        };
+
+        for b in &self.walls.get_on_body(&field_of_view) {
             match b.shape {
                 Shape::Circle(radius) => ellipse(CFG.graphics.wall_color, rectangle::centered_square(b.pos[0], b.pos[1], radius), context.transform, frame),
                 Shape::Rectangle(width, height) => rectangle(CFG.graphics.wall_color, rectangle::centered([b.pos[0], b.pos[1], width/2., height/2.]), context.transform, frame),
@@ -124,7 +124,7 @@ impl App {
         self.ball.pos[1] += dt*self.ball_vel[1];
 
         let mut collision = None;
-        for w in &self.walls {
+        for w in &self.walls.get_on_body(&self.ball) {
             if let Some(c) = self.ball.collide(w) {
                 collision = collision.map_or(Some(c.clone()), |mut collision| {collision.push(c); Some(collision)});
             }

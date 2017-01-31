@@ -1,57 +1,99 @@
-use svgparser::{self, svg};
+use svgparser::svg;
 use physics::{Body, Shape};
+use OkOrExit;
 
 pub struct Map {
     pub bodies: Vec<Body>,
     pub start: [f64; 2],
 }
 
-pub fn load_map(text: &[u8]) -> Result<Map, svgparser::Error> {
-    //TODO assert and unwrap....
+const MAP_FILE: &'static str = "map.svg";
+
+enum Error {
+    Io(::std::io::Error),
+    Svg(::svgparser::Error),
+}
+impl From<::std::io::Error> for Error {
+    fn from(err: ::std::io::Error) -> Error {
+        Error::Io(err)
+    }
+}
+impl From<::svgparser::Error> for Error {
+    fn from(err: ::svgparser::Error) -> Error {
+        Error::Svg(err)
+    }
+}
+impl ::std::fmt::Display for Error {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+        use self::Error::*;
+        match *self {
+            Io(ref e) => write!(fmt, "file `{}`: io error: {}", MAP_FILE, e),
+            Svg(ref e) => write!(fmt, "file `{}`: svg parser error: {:?}", MAP_FILE, e),
+        }
+    }
+}
+
+#[cfg(not(feature = "include_all"))]
+fn read_map_file() -> Result<Vec<u8>, Error> {
+    use std::fs::File;
+    use std::io::Read;
+    let mut map = Vec::new();
+    File::open(MAP_FILE)?.read_to_end(&mut map)?;
+    Ok(map)
+}
+
+#[cfg(feature = "include_all")]
+fn read_map_file() -> Result<&'static [u8], Error> {
+    Ok(include_bytes!("../map.svg"))
+}
+
+fn load_map() -> Result<Map, Error> {
+    let text = read_map_file()?;
+
     let mut parser = svg::Tokenizer::new(&text);
 
     let mut bodies = Vec::new();
 
     let mut start = None;
 
-    // bool is whereas it is start and array is cx, cy, rx, ry
-    let mut circle: Option<(bool, [Option<f64>; 3])> = None;
+    // bool is whereas it is start and f64 are cx, cy, r
+    let mut circle: Option<(bool, Option<f64>,Option<f64>,Option<f64>)> = None;
 
-    // array is x, y, width, height
-    let mut rect: Option<[Option<f64>; 4]> = None;
+    // f64 are x, y, width, height
+    let mut rect: Option<(Option<f64>,Option<f64>,Option<f64>,Option<f64>)> = None;
 
     loop {
         match parser.parse_next()? {
             svg::Token::ElementStart(name) => {
                 if name == b"circle" {
-                    circle = Some((false, [None, None, None]));
+                    circle = Some((false, None, None, None));
                 } else if name == b"rect" {
-                    rect = Some([None, None, None, None]);
+                    rect = Some((None, None, None, None));
                 }
             },
-            svg::Token::ElementEnd(name) => {
-                if circle.is_some() {
-                    assert_eq!(name, svg::ElementEnd::Empty);
-                    if circle.unwrap().0 {
-                        assert!(start.is_none());
-                        start = Some([circle.unwrap().1[0].unwrap(), circle.unwrap().1[1].unwrap()]);
-                    } else {
-                        bodies.push(Body {
-                            pos: [circle.unwrap().1[0].unwrap(), circle.unwrap().1[1].unwrap()],
-                            shape: Shape::Circle(circle.unwrap().1[2].unwrap()),
-                        });
+            svg::Token::ElementEnd(_) => {
+                if let Some(circle) = circle.take() {
+                    match circle {
+                        (true, Some(x), Some(y), _) => {
+                            if start.is_some() {
+                                println!("WARGNING: svg map redefinition of start");
+                            }
+                            start = Some([x, y]);
+                        }
+                        (false, Some(x), Some(y), Some(r)) => bodies.push(Body {
+                            pos: [x, y],
+                            shape: Shape::Circle(r),
+                        }),
+                        _ => println!("WARGNING: svg map incomplete circle definition"),
                     }
-                    circle = None;
-                } else if rect.is_some() {
-                    assert_eq!(name, svg::ElementEnd::Empty);
-                    bodies.push(Body {
-                        pos: [
-                            rect.unwrap()[0].unwrap()-rect.unwrap()[2].unwrap()/2.,
-                            rect.unwrap()[1].unwrap()-rect.unwrap()[3].unwrap()/2.,
-                        ],
-                        shape: Shape::Rectangle(rect.unwrap()[2].unwrap(), rect.unwrap()[3].unwrap()),
-                    });
-                    rect = None;
+                } else if let Some(rect) = rect.take() {
+                    match rect {
+                        (Some(x), Some(y), Some(w), Some(h)) => bodies.push(Body {
+                            pos: [x-w/2., y-h/2.],
+                            shape: Shape::Rectangle(w, h),
+                        }),
+                        _ => println!("WARGNING: svg map incomplete circle definition"),
+                    }
                 }
             },
             svg::Token::Attribute(b"id", value) => {
@@ -62,37 +104,37 @@ pub fn load_map(text: &[u8]) -> Result<Map, svgparser::Error> {
             },
             svg::Token::Attribute(b"cx", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.1[0] = Some(-value.parse_number().unwrap());
+                    circle.1 = Some(-value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"cy", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.1[1] = Some(-value.parse_number().unwrap());
+                    circle.2 = Some(-value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"r", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.1[2] = Some(value.parse_number().unwrap());
+                    circle.3 = Some(value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"x", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect[0] = Some(-value.parse_number().unwrap());
+                    rect.0 = Some(-value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"y", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect[1] = Some(-value.parse_number().unwrap());
+                    rect.1 = Some(-value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"width", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect[2] = Some(value.parse_number().unwrap());
+                    rect.2 = Some(value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"height", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect[3] = Some(value.parse_number().unwrap());
+                    rect.3 = Some(value.parse_number().unwrap());
                 }
             },
             svg::Token::EndOfStream => break,
@@ -102,7 +144,13 @@ pub fn load_map(text: &[u8]) -> Result<Map, svgparser::Error> {
 
     Ok(Map {
         bodies: bodies,
-        start: start.unwrap(),
+        start: start.unwrap_or_else(|| {
+            println!("WARGNING: svg map incomplete circle definition");
+            [0., 0.]
+        }),
     })
 }
 
+lazy_static! {
+    pub static ref MAP: Map = load_map().ok_or_exit();
+}

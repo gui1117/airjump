@@ -1,8 +1,6 @@
 use toml;
 use rustc_serialize::Decodable;
-use std::fs::File;
-use std::io::Read;
-use error::*;
+use OkOrExit;
 
 #[derive(RustcDecodable)]
 pub struct Configuration {
@@ -12,6 +10,7 @@ pub struct Configuration {
     pub camera: Camera,
     pub event_loop: EventLoop,
     pub control: Control,
+    pub physics: Physics,
 }
 
 #[derive(RustcDecodable)]
@@ -55,14 +54,54 @@ pub struct EventLoop {
     pub ups: u64,
     pub max_fps: u64,
 }
+#[derive(RustcDecodable)]
+pub struct Physics {
+    pub unit: f64,
+}
 
-fn read_configuration_file() -> AirjumpResult<String> {
+const CONFIG_FILE: &'static str = "config.toml";
+
+enum Error {
+    Io(::std::io::Error),
+    TomlParser(String),
+    TomlDecode(::toml::DecodeError),
+}
+impl From<::std::io::Error> for Error {
+    fn from(err: ::std::io::Error) -> Error {
+        Error::Io(err)
+    }
+}
+impl From<::toml::DecodeError> for Error {
+    fn from(err: ::toml::DecodeError) -> Error {
+        Error::TomlDecode(err)
+    }
+}
+impl ::std::fmt::Display for Error {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+        use self::Error::*;
+        match *self {
+            Io(ref e) => write!(fmt, "file `{}`: io error: {}", CONFIG_FILE, e),
+            TomlParser(ref e) => write!(fmt, "file `{}`: toml parser error:\n{}", CONFIG_FILE, e),
+            TomlDecode(ref e) => write!(fmt, "file `{}`: toml decode error: {}", CONFIG_FILE, e),
+        }
+    }
+}
+
+#[cfg(not(feature = "include_all"))]
+fn read_configuration_file() -> Result<String, Error> {
+    use std::fs::File;
+    use std::io::Read;
     let mut config = String::new();
-    File::open("Config.toml")?.read_to_string(&mut config)?;
+    File::open(CONFIG_FILE)?.read_to_string(&mut config)?;
     Ok(config)
 }
 
-fn load_configuration() -> AirjumpResult<Configuration> {
+#[cfg(feature = "include_all")]
+fn read_configuration_file() -> Result<&'static str, Error> {
+    Ok(include_str!("../config.toml"))
+}
+
+fn load_configuration() -> Result<Configuration, Error> {
     let config = read_configuration_file()?;
     let mut parser = toml::Parser::new(&config);
     let value = match parser.parse() {
@@ -74,7 +113,7 @@ fn load_configuration() -> AirjumpResult<Configuration> {
                 let hi = parser.to_linecol(error.hi);
                 string.push_str(&format!("\tline {} col {} to line {} col {}: {}", lo.0, lo.1, hi.0, hi.1, error.desc));
             }
-            return Err(AirjumpError::TomlParser(string));
+            return Err(Error::TomlParser(string));
         },
     };
     Ok(Configuration::decode(&mut toml::Decoder::new(toml::Value::Table(value)))?)
