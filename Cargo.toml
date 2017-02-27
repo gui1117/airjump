@@ -9,12 +9,14 @@ include_all = [] # include map.svg and config.toml into the binary
 
 [dependencies]
 rustc-serialize = "*"
-toml = "*"
-piston = "*"
-piston2d-graphics = "*"
-piston2d-glium_graphics = "*"
+toml = "0.2"
 lazy_static = "*"
 glium = "*"
 svgparser = "*"
 fnv = "*"
-glutin = "*"
+time = "*"
+fps_clock = "*"
+conrod = { version = "*", features = ["winit", "glium"] }
+rusttype = "*"
+image = "*"
+vecmath = "*"

@@ -1,27 +1,27 @@
-extern crate piston;
-extern crate glium_graphics;
+extern crate fps_clock;
 extern crate toml;
-extern crate graphics;
 extern crate rustc_serialize;
-extern crate glium;
-extern crate glutin;
 extern crate svgparser;
 extern crate fnv;
+extern crate rusttype;
+extern crate image;
+extern crate vecmath;
+#[macro_use] extern crate glium;
+#[macro_use] extern crate conrod;
 #[macro_use] extern crate lazy_static;
 
 mod spatial_hashing;
 mod configuration;
+mod ui;
 pub mod math;
 mod app;
 mod map;
 mod physics;
+pub mod graphics;
 
 use configuration::CFG;
 
-use piston::window::{WindowSettings, AdvancedWindow};
-use piston::event_loop::EventLoop;
-use piston::input::Input;
-use glium_graphics::{GliumWindow, OpenGL, Glium2d};
+use glium::{glutin, DisplayBuild, Surface};
 
 pub trait OkOrExit {
     type OkType;
@@ -45,52 +45,69 @@ fn main() {
 }
 
 fn safe_main() -> Result<(), String> {
-    //TODO maybe let that being configuration
-    let opengl = OpenGL::V3_2;
+    let mut builder = glutin::WindowBuilder::new()
+        .with_multitouch()
+        .with_title("airjump");
 
-    // set monitor dimension instead of configuration in fullscreen
-    let dimensions = if CFG.window.fullscreen {
-        let (w, h) = glutin::get_primary_monitor().get_dimensions();
-        [w, h]
+    if CFG.window.fullscreen {
+        builder = builder.with_fullscreen(glutin::get_primary_monitor());
     } else {
-        CFG.window.dimensions
-    };
-
-    let mut window: GliumWindow = WindowSettings::new(
-        "airjump", dimensions)
-        .exit_on_esc(true)
-        .opengl(opengl)
-        .vsync(CFG.window.vsync)
-        .fullscreen(CFG.window.fullscreen)
-        .samples(CFG.window.samples)
-        .build()?;
-
-    window = window.capture_cursor(true)
-        .ups(CFG.event_loop.ups)
-        .max_fps(CFG.event_loop.max_fps);
-
-
-    let mut app = app::App::new();
-    let mut gl = Glium2d::new(opengl, &window);
-    while let Some(e) = window.next() {
-        match e {
-            Input::Render(args) => {
-                let mut target = window.draw();
-                gl.draw(&mut target, args.viewport(), |context, frame| {
-                    app.render(context, frame);
-                });
-                target.finish().unwrap();
-            },
-            Input::AfterRender(_args) => (),
-            Input::Update(args) => app.update(args.dt),
-            Input::Idle(_args) => (),
-            Input::Press(button) => app.press(button),
-            Input::Release(button) => app.release(button),
-            Input::Move(motion) => app.do_move(motion),
-            Input::Resize(w, h) => app.resize(w, h),
-            Input::Close(..) => break,
-            Input::Text(..) | Input::Cursor(..) | Input::Focus(..) | Input::Custom(..) => (),
-        }
+        let width = CFG.window.dimensions[0];
+        let height = CFG.window.dimensions[1];
+        builder = builder.with_dimensions(width, height);
     }
+    if CFG.window.vsync {
+        builder = builder.with_vsync();
+    }
+    if CFG.window.samples > 0 && CFG.window.samples.is_power_of_two() {
+        builder = builder.with_multisampling(CFG.window.samples as u16);
+    } else {
+        panic!("multisampling invalid");
+    }
+
+    let window = builder.build_glium().unwrap();
+
+    let mut ui = ui::Ui::new(&window);
+    let mut app = app::App::new(&window);
+
+    // Main loop
+    //
+    // If running out of time then slow down the game
+
+    let mut fps_clock = fps_clock::FpsClock::new(CFG.event_loop.max_fps);
+    let dt = 1.0 / CFG.event_loop.max_fps as f64;
+
+    'main_loop: loop {
+
+        let events = window.poll_events().collect::<Vec<glium::glutin::Event>>();
+
+        for event in &events {
+            if let Some(event) = conrod::backend::winit::convert(event.clone(), &window) {
+                ui.ui.handle_event(event);
+            }
+        }
+
+        ui.update(&window);
+
+        for event in events {
+            use glium::glutin::Event::*;
+            match event {
+                Closed => break 'main_loop,
+                Resized(w, h) => app.resize(w, h),
+                _ => (),
+            }
+        }
+
+        app.update(dt);
+
+        let mut target = window.draw();
+        target.clear_color(1.0, 1.0, 1.0, 1.0);
+        app.draw(&mut target);
+        ui.draw(&window, &mut target);
+        target.finish().unwrap();
+
+        fps_clock.tick();
+    }
+
     Ok(())
 }

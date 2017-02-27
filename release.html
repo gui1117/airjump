@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Emscripten-Generated Code</title>
+		<style>
+html, body {
+	font-family: arial;
+	margin: 0;
+	padding: none;
+	overflow: hidden;
+}
+/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+canvas.emscripten {
+	border: 0px none;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+#spinner {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	height: 30px;
+	width: 30px;
+	margin: 0;
+	vertical-align: top;
+	-webkit-animation: rotation .8s linear infinite;
+	-moz-animation: rotation .8s linear infinite;
+	-o-animation: rotation .8s linear infinite;
+	animation: rotation 0.8s linear infinite;
+	border-left: 5px solid rgb(235, 235, 235);
+	border-right: 5px solid rgb(235, 235, 235);
+	border-bottom: 5px solid rgb(235, 235, 235);
+	border-top: 5px solid rgb(120, 120, 120);
+
+	border-radius: 100%;
+	background-color: rgb(0, 0, 0);
+}
+@-webkit-keyframes rotation {
+	from {-webkit-transform: rotate(0deg);}
+	to {-webkit-transform: rotate(360deg);}
+}
+@-moz-keyframes rotation {
+	from {-moz-transform: rotate(0deg);}
+	to {-moz-transform: rotate(360deg);}
+}
+@-o-keyframes rotation {
+	from {-o-transform: rotate(0deg);}
+	to {-o-transform: rotate(360deg);}
+}
+@keyframes rotation {
+	from {transform: rotate(0deg);}
+	to {transform: rotate(360deg);}
+}
+/* make the video stretch to fill the screen in WebKit */
+:-webkit-full-screen #canvas {
+	width: 100%;
+	height: 100%;
+}
+		</style>
+		<script type="text/javascript">
+function toggleFullScreen() {
+	var canvas = document.getElementById('canvas');
+	if (!document.mozFullScreen && !document.webkitFullScreen) {
+		if (canvas.mozRequestFullScreen) {
+			canvas.mozRequestFullScreen();
+		} else {
+			canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+		}
+	} else {
+		if (document.mozCancelFullScreen) {
+			document.mozCancelFullScreen();
+		} else {
+			document.webkitCancelFullScreen();
+		}
+	}
+}
+function resize_canvas() {
+	var canvas = document.getElementById("canvas");
+	if (canvas.width  < window.innerWidth)
+	{
+		canvas.width  = window.innerWidth;
+	}
+
+	if (canvas.height < window.innerHeight)
+	{
+		canvas.height = window.innerHeight;
+	}
+}
+function request_pointer_lock() {
+	var canvas = document.getElementById("canvas");
+
+	canvas.requestPointerLock = canvas.requestPointerLock ||
+		canvas.mozRequestPointerLock;
+
+	canvas.requestPointerLock();
+}
+		</script>
+	</head>
+	<body onresize="resize_canvas()">
+		<div id="spinner"></div>
+		<span id='controls'>
+			<span><input type="button" value="Fullscreen" onclick="toggleFullScreen()"></span>
+		</span>
+
+		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+		<script type='text/javascript'>
+var spinnerElement = document.getElementById('spinner');
+var Module = {
+	preRun: [],
+	postRun: [],
+	print: (function() {
+		return function(text) {
+			if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+			console.log(text);
+		};
+	})(),
+	canvas: (function() {
+		var canvas = document.getElementById('canvas');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		// As a default initial behavior, pop up an alert when webgl context is lost. To make your
+		// application robust, you may want to override this behavior before shipping!
+		// See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+		canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+		return canvas;
+	})(),
+	setStatus: function(text) {
+		if (!text) {
+			spinnerElement.style.display = 'none';
+		}
+	},
+};
+		</script>
+		<script async type="text/javascript"  src="target/asmjs-unknown-emscripten/release/triangle.js"></script>
+	</body>
+</html>

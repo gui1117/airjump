@@ -51,8 +51,7 @@ pub struct Camera {
 }
 #[derive(RustcDecodable)]
 pub struct EventLoop {
-    pub ups: u64,
-    pub max_fps: u64,
+    pub max_fps: u32,
 }
 #[derive(RustcDecodable)]
 pub struct Physics {
