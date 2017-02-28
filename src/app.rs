@@ -24,6 +24,7 @@ pub struct App {
     effects: Vec<Effect>,
     cursor: [f64; 2],
     graphics: Graphics,
+    pub must_quit: bool,
 }
 
 impl App {
@@ -42,7 +43,14 @@ impl App {
             graphics: Graphics::new(window).unwrap(),
             effects: vec!(),
             airjump: true,
+            must_quit: false,
         }
+    }
+    pub fn toggle_fullscreen(&mut self) {
+        unimplemented!();
+    }
+    pub fn quit(&mut self) {
+        self.must_quit = true;
     }
     pub fn draw(&mut self, frame: &mut glium::Frame) {
         let camera = graphics::Camera {
@@ -76,8 +84,7 @@ impl App {
             let half_height = CFG.graphics.effect_thickness/2.;
 
             let transform = graphics::Transformation::identity()
-                .translate(effect.pos[0] as f32, effect.pos[1] as f32)
-                ;
+                .translate(effect.pos[0] as f32, effect.pos[1] as f32);
             // let transform = context.transform
             //     .trans(effect.pos[0], effect.pos[1])
             //     .rot_rad(effect.angle)
@@ -194,18 +201,18 @@ impl App {
     //         _ => (),
     //     }
     // }
-    // pub fn release(&mut self, _button: Button) {}
-    // pub fn do_move(&mut self, motion: Motion) {
-    //     match motion {
-    //         Motion::MouseRelative(mut dx, mut dy) => {
-    //             dx *= CFG.control.mouse_sensibility;
-    //             dy *= CFG.control.mouse_sensibility;
-    //             self.cursor[0] = f64::max(0., f64::min(self.cursor[0] + dx, self.window_size[0] as f64));
-    //             self.cursor[1] = f64::max(0., f64::min(self.cursor[1] + dy, self.window_size[1] as f64));
-    //         },
-    //         _ => (),
-    //     }
-    // }
+    pub fn mouse_move(&mut self, x: i32, y: i32) {
+        println!("x: {}, y: {}", x,y);
+        // match motion {
+        //     Motion::MouseRelative(mut dx, mut dy) => {
+        //         dx *= CFG.control.mouse_sensibility;
+        //         dy *= CFG.control.mouse_sensibility;
+        //         self.cursor[0] = f64::max(0., f64::min(self.cursor[0] + dx, self.window_size[0] as f64));
+        //         self.cursor[1] = f64::max(0., f64::min(self.cursor[1] + dy, self.window_size[1] as f64));
+        //     },
+        //     _ => (),
+        // }
+    }
     pub fn resize(&mut self, w: u32, h: u32) {
         self.window_size = [w, h];
     }

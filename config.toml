@@ -1,6 +1,6 @@
 [window]
 samples = 2
-fullscreen = true
+fullscreen = false
 vsync = true
 dimensions = [640, 480]
 

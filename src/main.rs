@@ -67,6 +67,9 @@ fn safe_main() -> Result<(), String> {
 
     let window = builder.build_glium().unwrap();
 
+    window.get_window().unwrap().set_cursor_state(glutin::CursorState::Hide).unwrap();
+    window.get_window().unwrap().set_cursor_state(glutin::CursorState::Grab).unwrap();
+
     let mut ui = ui::Ui::new(&window);
     let mut app = app::App::new(&window);
 
@@ -81,30 +84,38 @@ fn safe_main() -> Result<(), String> {
 
         let events = window.poll_events().collect::<Vec<glium::glutin::Event>>();
 
+        let old_ui_menu_state = ui.menu_state;
         for event in &events {
             if let Some(event) = conrod::backend::winit::convert(event.clone(), &window) {
                 ui.ui.handle_event(event);
             }
         }
 
-        ui.update(&window);
+        ui.update(&window, &mut app);
 
-        for event in events {
-            use glium::glutin::Event::*;
-            match event {
-                Closed => break 'main_loop,
-                Resized(w, h) => app.resize(w, h),
-                _ => (),
+        if !(ui.menu_state || old_ui_menu_state) {
+            for event in events {
+                use glium::glutin::Event::*;
+                match event {
+                    Closed => break 'main_loop,
+                    Resized(w, h) => app.resize(w, h),
+                    MouseMoved(x, y) => app.mouse_move(x, y),
+                    _ => (),
+                }
             }
-        }
 
-        app.update(dt);
+            app.update(dt);
+        }
 
         let mut target = window.draw();
         target.clear_color(1.0, 1.0, 1.0, 1.0);
         app.draw(&mut target);
         ui.draw(&window, &mut target);
         target.finish().unwrap();
+
+        if app.must_quit {
+            break 'main_loop;
+        }
 
         fps_clock.tick();
     }

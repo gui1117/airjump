@@ -2,6 +2,7 @@ use conrod;
 use rusttype;
 use glium;
 
+use app::App;
 use glium::backend::glutin_backend::GlutinFacade;
 use conrod::{widget, Positionable, Colorable, Widget, Labelable, Borderable, Sizeable};
 use conrod::backend::winit::WinitWindow;
@@ -27,6 +28,8 @@ widget_ids!(struct Ids {
     quit,
 });
 
+//"⇱Ξ≡⧉⊞⊟Χ≡↵"
+
 static FONT: &'static [u8] = include_bytes!("../DejaVuSans.ttf");
 
 pub struct Ui {
@@ -34,6 +37,7 @@ pub struct Ui {
     ids: Ids,
     pub ui: conrod::Ui,
     renderer: conrod::backend::glium::Renderer,
+    pub menu_state: bool,
 }
 
 impl Ui {
@@ -59,52 +63,57 @@ impl Ui {
             ids: ids,
             ui: ui,
             renderer: renderer,
+            menu_state: false,
         }
     }
 
-    pub fn update(&mut self, window: &GlutinFacade) { //, app: &mut App) {
-        // Instantiate all widgets in the GUI.
-        {
+    pub fn update(&mut self, window: &GlutinFacade, app: &mut App) {
+        let (w,h) = window.get_inner_size().unwrap();
+        let size = cmp::min(w, h) / 20;
+        let border_size = size as f64 /8.;
+        let width = size as f64 * 1.5 * 8.;
+        let height = size as f64 * 1.5;
+        let number_of_line = 6usize;
+
+        if self.menu_state {
+            // Instantiate all widgets in the GUI.
             let ui = &mut self.ui.set_widgets();
-            let (w,h) = window.get_inner_size().unwrap();
-            let size = cmp::min(w, h) / 20;
-            let border_size = size as f64 /8.;
-            let width = size as f64 * 1.5 * 8.;
-            let height = size as f64 * 1.5;
-            let number_of_line = 6usize;
 
             for _ in widget::Button::new()
                 .label("↵")
-                    .top_right_with_margin_on(ui.window, size as f64 / 2.)
-                    .border(size as f64 / 8.)
-                    .w_h(height, height)
-                    .label_font_size(size)
-                    .set(self.ids.menu, ui)
-                    {
-                    }
+                .top_right_with_margin_on(ui.window, size as f64 / 2.)
+                .border(size as f64 / 8.)
+                .w_h(height, height)
+                .label_font_size(size)
+                .set(self.ids.menu, ui)
+            {
+                self.menu_state = false;
+            }
 
             for _ in widget::Button::new()
                 .label("resume")
-                    .down(h as f64/2. - (number_of_line+1) as f64 / 2. * (height + border_size*2.))
-                    .align_middle_x_of(ui.window)
-                    .border(border_size)
-                    .h(height)
-                    .w(width)
-                    .label_font_size(size)
-                    .set(self.ids.resume, ui)
-                    {
-                    }
+                .down(h as f64/2. - (number_of_line+1) as f64 / 2. * (height + border_size*2.))
+                .align_middle_x_of(ui.window)
+                .border(border_size)
+                .h(height)
+                .w(width)
+                .label_font_size(size)
+                .set(self.ids.resume, ui)
+            {
+                self.menu_state = false;
+            }
 
             for _ in widget::Button::new()
                 .down(border_size)
-                    .label("set fullscreen")
-                    .border(border_size)
-                    .h(height)
-                    .w(width)
-                    .label_font_size(size)
-                    .set(self.ids.fullscreen, ui)
-                    {
-                    }
+                .label("toggle fullscreen")
+                .border(border_size)
+                .h(height)
+                .w(width)
+                .label_font_size(size)
+                .set(self.ids.fullscreen, ui)
+            {
+                app.toggle_fullscreen();
+            }
 
             widget::Canvas::new()
                 .color(conrod::color::WHITE)
@@ -130,26 +139,30 @@ impl Ui {
 
             for _ in widget::Button::new()
                 .label("+")
-                    .align_middle_y_of(self.ids.music_slider)
-                    .align_right_of(self.ids.fullscreen)
-                    .h(height)
-                    .w(height)
-                    .border(border_size)
-                    .label_font_size(size)
-                    .set(self.ids.music_plus, ui)
-                    {}
+                .align_middle_y_of(self.ids.music_slider)
+                .align_right_of(self.ids.fullscreen)
+                .h(height)
+                .w(height)
+                .border(border_size)
+                .label_font_size(size)
+                .set(self.ids.music_plus, ui)
+            {
+                unimplemented!();
+            }
 
             for _ in widget::Button::new()
                 .label("−")
-                    .left(size as f64 * 0.5)
-                    .align_middle_y_of(self.ids.music_slider)
-                    .align_left_of(self.ids.fullscreen)
-                    .h(height)
-                    .w(height)
-                    .border(border_size)
-                    .label_font_size(size)
-                    .set(self.ids.music_minus, ui)
-                    {}
+                .left(size as f64 * 0.5)
+                .align_middle_y_of(self.ids.music_slider)
+                .align_left_of(self.ids.fullscreen)
+                .h(height)
+                .w(height)
+                .border(border_size)
+                .label_font_size(size)
+                .set(self.ids.music_minus, ui)
+            {
+                unimplemented!();
+            }
 
             widget::Text::new("music")
                 .align_middle_y_of(self.ids.music_slider)
@@ -183,26 +196,30 @@ impl Ui {
 
             for _ in widget::Button::new()
                 .label("+")
-                    .align_middle_y_of(self.ids.effect_slider)
-                    .align_right_of(self.ids.fullscreen)
-                    .h(height)
-                    .w(height)
-                    .border(border_size)
-                    .label_font_size(size)
-                    .set(self.ids.effect_plus, ui)
-                    {}
+                .align_middle_y_of(self.ids.effect_slider)
+                .align_right_of(self.ids.fullscreen)
+                .h(height)
+                .w(height)
+                .border(border_size)
+                .label_font_size(size)
+                .set(self.ids.effect_plus, ui)
+            {
+                unimplemented!();
+            }
 
             for _ in widget::Button::new()
                 .label("−")
-                    .left(size as f64 * 0.5)
-                    .align_middle_y_of(self.ids.effect_slider)
-                    .align_left_of(self.ids.fullscreen)
-                    .h(height)
-                    .w(height)
-                    .border(border_size)
-                    .label_font_size(size)
-                    .set(self.ids.effect_minus, ui)
-                    {}
+                .left(size as f64 * 0.5)
+                .align_middle_y_of(self.ids.effect_slider)
+                .align_left_of(self.ids.fullscreen)
+                .h(height)
+                .w(height)
+                .border(border_size)
+                .label_font_size(size)
+                .set(self.ids.effect_minus, ui)
+            {
+                unimplemented!();
+            }
 
             widget::Text::new("effect")
                 .align_middle_y_of(self.ids.effect_slider)
@@ -214,28 +231,56 @@ impl Ui {
 
             for _ in widget::Button::new()
                 .down(border_size*3.)
-                    .align_middle_x_of(self.ids.fullscreen)
-                    .label("donate")
-                    .border(border_size)
-                    .h(height)
-                    .w(width)
-                    .label_font_size(size)
-                    .set(self.ids.donate, ui)
-                    {
-                    }
+                .align_middle_x_of(self.ids.fullscreen)
+                .label("donate")
+                .border(border_size)
+                .h(height)
+                .w(width)
+                .label_font_size(size)
+                .set(self.ids.donate, ui)
+            {
+                unimplemented!();
+            }
 
             for _ in widget::Button::new()
                 .down(border_size)
-                    .align_middle_x_of(self.ids.fullscreen)
-                    .label("quit")
-                    .border(border_size)
-                    .h(height)
-                    .w(width)
-                    .label_font_size(size)
-                    .set(self.ids.quit, ui)
-                    {
-                    }
+                .align_middle_x_of(self.ids.fullscreen)
+                .label("quit")
+                .border(border_size)
+                .h(height)
+                .w(width)
+                .label_font_size(size)
+                .set(self.ids.quit, ui)
+            {
+                app.quit();
+            }
+        } else {
+            // Instantiate all widgets in the GUI.
+            let ui = &mut self.ui.set_widgets();
+
+            for _ in widget::Button::new()
+                .label("≡")
+                .top_right_with_margin_on(ui.window, size as f64 / 2.)
+                .border(size as f64 / 8.)
+                .w_h(height, height)
+                .label_font_size(size)
+                .set(self.ids.menu, ui)
+            {
+                self.menu_state = true;
+            }
+
+            for _ in widget::Button::new()
+                .label("⇱")
+                .left(border_size*2.)
+                .border(size as f64 / 8.)
+                .w_h(height, height)
+                .label_font_size(size)
+                .set(self.ids.fullscreen, ui)
+            {
+                app.toggle_fullscreen();
+            }
         }
+
         // Render UI
         self.renderer.fill(window, self.ui.draw(), &self.image_map);
     }
