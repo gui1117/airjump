@@ -1,6 +1,6 @@
 [window]
 samples = 2
-fullscreen = false
+fullscreen = true
 vsync = true
 dimensions = [640, 480]
 
@@ -21,9 +21,9 @@ wall_color = [0.0, 0.0, 0.0, 1.0]
 cursor_color = [1.0, 0.0, 0.0, 1.0]
 effect_color = [1.0, 0.0, 0.0, 1.0]
 
-cursor_inner_radius = 0.01
-cursor_outer_radius = 0.02
-cursor_thickness = 0.005
+cursor_inner_radius = 0.00003
+cursor_outer_radius = 0.00006
+cursor_thickness = 0.000015
 
 effect_timer = 0.8
 effect_thickness = 0.4
@@ -33,7 +33,7 @@ ups = 60
 max_fps = 60
 
 [control]
-mouse_sensibility = 1.0
+mouse_sensibility = 0.005
 
 [physics]
 unit = 5.0

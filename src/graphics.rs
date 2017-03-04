@@ -208,7 +208,7 @@ impl Graphics {
 }
 
 pub struct Frame<'a> {
-    frame: &'a mut glium::Frame,
+    pub frame: &'a mut glium::Frame,
     graphics: &'a mut Graphics,
     camera_matrix: [[f32; 4]; 4],
     billboard_camera_matrix: [[f32; 4]; 4],
@@ -241,21 +241,17 @@ impl<'a> Frame<'a> {
             let ky = camera.zoom * ratio;
             let dx = -camera.x;
             let dy = -camera.y;
-            [[kx, 0., 0., 0.],
-             [0., ky, 0., 0.],
-             [0., 0., 1., 0.],
+            [[     kx,      0., 0., 0.],
+             [     0.,      ky, 0., 0.],
+             [     0.,      0., 1., 0.],
              [kx * dx, ky * dy, 0., 1.]]
         };
         let billboard_camera_matrix = {
-            let kx = 1.0;
-            let ky = ratio;
-            [[kx, 0., 0., 0.],
-             [0., ky, 0., 0.],
-             [0., 0., 1., 0.],
-             [0., 0., 0., 1.]]
+            [[1.,    0., 0., 0.],
+             [0., ratio, 0., 0.],
+             [0.,    0., 1., 0.],
+             [0.,    0., 0., 1.]]
         };
-
-        frame.clear_color_and_depth((1.0, 1.0, 1.0, 1.0), 0f32);;
 
         Frame {
             billboard_camera_matrix: billboard_camera_matrix,
@@ -263,6 +259,14 @@ impl<'a> Frame<'a> {
             frame: frame,
             graphics: graphics,
         }
+    }
+
+    pub fn size(&self) -> (u32, u32) {
+        self.graphics.context.get_framebuffer_dimensions()
+    }
+
+    pub fn clear(&mut self) {
+        self.frame.clear_color_and_depth((1.0, 1.0, 1.0, 1.0), 0f32);
     }
 
     #[inline]

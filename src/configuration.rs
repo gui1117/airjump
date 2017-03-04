@@ -38,12 +38,12 @@ pub struct Graphics {
     pub wall_color: [f32; 4],
     pub background_color: [f32; 4],
     pub cursor_color: [f32; 4],
-    pub cursor_inner_radius: f64,
-    pub cursor_outer_radius: f64,
-    pub cursor_thickness: f64,
+    pub cursor_inner_radius: f32,
+    pub cursor_outer_radius: f32,
+    pub cursor_thickness: f32,
     pub effect_timer: f64,
     pub effect_color: [f32; 4],
-    pub effect_thickness: f64,
+    pub effect_thickness: f32,
 }
 #[derive(RustcDecodable)]
 pub struct Camera {

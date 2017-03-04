@@ -21,7 +21,7 @@ pub mod graphics;
 
 use configuration::CFG;
 
-use glium::{glutin, DisplayBuild, Surface};
+use glium::{glutin, DisplayBuild};
 
 pub trait OkOrExit {
     type OkType;
@@ -67,11 +67,14 @@ fn safe_main() -> Result<(), String> {
 
     let window = builder.build_glium().unwrap();
 
+    let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
+    let mut cursor = [w as f64/2., h as f64/2.];
+    window.get_window().unwrap().set_cursor_position(cursor[0] as i32, cursor[1] as i32).unwrap();
     window.get_window().unwrap().set_cursor_state(glutin::CursorState::Hide).unwrap();
-    window.get_window().unwrap().set_cursor_state(glutin::CursorState::Grab).unwrap();
+    let mut graphics = graphics::Graphics::new(&window).unwrap();
 
     let mut ui = ui::Ui::new(&window);
-    let mut app = app::App::new(&window);
+    let mut app = app::App::new();
 
     // Main loop
     //
@@ -80,14 +83,51 @@ fn safe_main() -> Result<(), String> {
     let mut fps_clock = fps_clock::FpsClock::new(CFG.event_loop.max_fps);
     let dt = 1.0 / CFG.event_loop.max_fps as f64;
 
+
     'main_loop: loop {
 
         let events = window.poll_events().collect::<Vec<glium::glutin::Event>>();
 
-        let old_ui_menu_state = ui.menu_state;
         for event in &events {
-            if let Some(event) = conrod::backend::winit::convert(event.clone(), &window) {
-                ui.ui.handle_event(event);
+            use glium::glutin::Event::*;
+            match *event {
+                Closed => break 'main_loop,
+                _ => (),
+            }
+        }
+
+        let old_ui_menu_state = ui.menu_state;
+        for event in events.iter().cloned() {
+            let event = if let glutin::Event::MouseMoved(x, y) = event {
+                let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
+                if let Ok(()) = window.get_window().unwrap().set_cursor_position((w/2) as i32, (h/2) as i32) {
+
+                    let dx = x - (w/2) as i32;
+                    let dy = y - (h/2) as i32;
+
+                    if dx != 0 || dy != 0 {
+                        cursor[0] += dx as f64 * CFG.control.mouse_sensibility;
+                        cursor[1] += -dy as f64 * CFG.control.mouse_sensibility;
+
+                        let ratio = w as f64 / h as f64;
+                        cursor[0] = f64::max(-1., f64::min(cursor[0], 1.));
+                        cursor[1] = f64::max(-1./ratio, f64::min(cursor[1], 1./ratio));
+                        app.set_jump_angle(cursor[1].atan2(cursor[0]));
+                        Some(glutin::Event::MouseMoved(((cursor[0]+1.)*w as f64/2.) as i32, ((-cursor[1]+1./ratio)*h as f64/2.*ratio) as i32))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                Some(event)
+            };
+
+            if let Some(event) = event {
+                if let Some(event) = conrod::backend::winit::convert(event.clone(), &window) {
+                    ui.ui.handle_event(event);
+                }
             }
         }
 
@@ -96,10 +136,10 @@ fn safe_main() -> Result<(), String> {
         if !(ui.menu_state || old_ui_menu_state) {
             for event in events {
                 use glium::glutin::Event::*;
+                use glium::glutin::ElementState::*;
+                use glium::glutin::MouseButton::*;
                 match event {
-                    Closed => break 'main_loop,
-                    Resized(w, h) => app.resize(w, h),
-                    MouseMoved(x, y) => app.mouse_move(x, y),
+                    MouseInput(Pressed, Left) => app.do_jump(),
                     _ => (),
                 }
             }
@@ -108,9 +148,14 @@ fn safe_main() -> Result<(), String> {
         }
 
         let mut target = window.draw();
-        target.clear_color(1.0, 1.0, 1.0, 1.0);
-        app.draw(&mut target);
-        ui.draw(&window, &mut target);
+        {
+            let camera = app.camera();
+            let mut frame = graphics::Frame::new(&mut graphics, &mut target, &camera);
+            frame.clear();
+            app.draw(&mut frame);
+            ui.draw(&window, &mut frame.frame);
+            draw_cursor(cursor, &mut frame);
+        }
         target.finish().unwrap();
 
         if app.must_quit {
@@ -121,4 +166,40 @@ fn safe_main() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn draw_cursor(cursor: [f64; 2], frame: &mut graphics::Frame) {
+    use graphics::{self, Layer, Transformed};
+    let (w, h) = frame.size();
+
+    let unit = f32::min(w as f32, h as f32);
+
+    let color = CFG.graphics.cursor_color;
+    let half_width = (CFG.graphics.cursor_outer_radius - CFG.graphics.cursor_inner_radius)/2. * unit;
+    let half_height = CFG.graphics.cursor_thickness/2. * unit;
+    let delta = CFG.graphics.cursor_inner_radius * unit + half_width;
+
+    let transform = graphics::Transformation::identity()
+        .translate(cursor[0] as f32, cursor[1] as f32)
+        .translate(delta, 0.)
+        .scale(half_width, half_height);
+    frame.draw_quad(transform, Layer::Billboard, color);
+
+    let transform = graphics::Transformation::identity()
+        .translate(cursor[0] as f32, cursor[1] as f32)
+        .translate(-delta, 0.)
+        .scale(half_width, half_height);
+    frame.draw_quad(transform, Layer::Billboard, color);
+
+    let transform = graphics::Transformation::identity()
+        .translate(cursor[0] as f32, cursor[1] as f32)
+        .translate(0., delta)
+        .scale(half_height, half_width);
+    frame.draw_quad(transform, Layer::Billboard, color);
+
+    let transform = graphics::Transformation::identity()
+        .translate(cursor[0] as f32, cursor[1] as f32)
+        .translate(0., -delta)
+        .scale(half_height, half_width);
+    frame.draw_quad(transform, Layer::Billboard, color);
 }
