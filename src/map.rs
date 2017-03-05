@@ -89,7 +89,7 @@ fn load_map() -> Result<Map, Error> {
                 } else if let Some(rect) = rect.take() {
                     match rect {
                         (Some(x), Some(y), Some(w), Some(h)) => bodies.push(Body {
-                            pos: [x-w/2., y-h/2.],
+                            pos: [x+w/2., y-h/2.],
                             shape: Shape::Rectangle(w, h),
                         }),
                         _ => println!("WARGNING: svg map incomplete circle definition"),
@@ -104,7 +104,7 @@ fn load_map() -> Result<Map, Error> {
             },
             svg::Token::Attribute(b"cx", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.1 = Some(-value.parse_number().unwrap());
+                    circle.1 = Some(value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"cy", mut value) => {
@@ -119,7 +119,7 @@ fn load_map() -> Result<Map, Error> {
             },
             svg::Token::Attribute(b"x", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.0 = Some(-value.parse_number().unwrap());
+                    rect.0 = Some(value.parse_number().unwrap());
                 }
             },
             svg::Token::Attribute(b"y", mut value) => {

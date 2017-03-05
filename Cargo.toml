@@ -16,7 +16,5 @@ svgparser = "*"
 fnv = "*"
 time = "*"
 fps_clock = "*"
-conrod = { version = "*", features = ["winit", "glium"] }
-rusttype = "*"
 image = "*"
 vecmath = "*"

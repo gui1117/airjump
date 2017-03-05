@@ -3,16 +3,13 @@ extern crate toml;
 extern crate rustc_serialize;
 extern crate svgparser;
 extern crate fnv;
-extern crate rusttype;
 extern crate image;
 extern crate vecmath;
 #[macro_use] extern crate glium;
-#[macro_use] extern crate conrod;
 #[macro_use] extern crate lazy_static;
 
 mod spatial_hashing;
 mod configuration;
-mod ui;
 pub mod math;
 mod app;
 mod map;
@@ -73,7 +70,6 @@ fn safe_main() -> Result<(), String> {
     window.get_window().unwrap().set_cursor_state(glutin::CursorState::Hide).unwrap();
     let mut graphics = graphics::Graphics::new(&window).unwrap();
 
-    let mut ui = ui::Ui::new(&window);
     let mut app = app::App::new();
 
     // Main loop
@@ -86,66 +82,48 @@ fn safe_main() -> Result<(), String> {
 
     'main_loop: loop {
 
-        let events = window.poll_events().collect::<Vec<glium::glutin::Event>>();
 
-        for event in &events {
+        for event in window.poll_events() {
             use glium::glutin::Event::*;
-            match *event {
+            use glium::glutin::ElementState;
+            use glium::glutin::MouseButton;
+            match event {
                 Closed => break 'main_loop,
+                MouseMoved(x, y) => {
+                    let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
+                    if let Ok(()) = window.get_window().unwrap().set_cursor_position((w/2) as i32, (h/2) as i32) {
+
+                        let dx = x - (w/2) as i32;
+                        let dy = y - (h/2) as i32;
+
+                        if dx != 0 || dy != 0 {
+                            cursor[0] += dx as f64 * CFG.control.mouse_sensibility;
+                            cursor[1] += -dy as f64 * CFG.control.mouse_sensibility;
+
+                            let ratio = w as f64 / h as f64;
+                            cursor[0] = f64::max(-1., f64::min(cursor[0], 1.));
+                            cursor[1] = f64::max(-1./ratio, f64::min(cursor[1], 1./ratio));
+                            app.set_jump_angle(cursor[1].atan2(cursor[0]) + ::std::f64::consts::PI);
+                        }
+                    }
+                },
+                MouseInput(ElementState::Pressed, MouseButton::Left) => app.do_jump(),
+                Refresh => {
+                    let mut target = window.draw();
+                    {
+                        let camera = app.camera();
+                        let mut frame = graphics::Frame::new(&mut graphics, &mut target, &camera);
+                        frame.clear();
+                        app.draw(&mut frame);
+                        draw_cursor(cursor, &mut frame);
+                    }
+                    target.finish().unwrap();
+                }
                 _ => (),
             }
         }
 
-        let old_ui_menu_state = ui.menu_state;
-        for event in events.iter().cloned() {
-            let event = if let glutin::Event::MouseMoved(x, y) = event {
-                let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
-                if let Ok(()) = window.get_window().unwrap().set_cursor_position((w/2) as i32, (h/2) as i32) {
-
-                    let dx = x - (w/2) as i32;
-                    let dy = y - (h/2) as i32;
-
-                    if dx != 0 || dy != 0 {
-                        cursor[0] += dx as f64 * CFG.control.mouse_sensibility;
-                        cursor[1] += -dy as f64 * CFG.control.mouse_sensibility;
-
-                        let ratio = w as f64 / h as f64;
-                        cursor[0] = f64::max(-1., f64::min(cursor[0], 1.));
-                        cursor[1] = f64::max(-1./ratio, f64::min(cursor[1], 1./ratio));
-                        app.set_jump_angle(cursor[1].atan2(cursor[0]));
-                        Some(glutin::Event::MouseMoved(((cursor[0]+1.)*w as f64/2.) as i32, ((-cursor[1]+1./ratio)*h as f64/2.*ratio) as i32))
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            } else {
-                Some(event)
-            };
-
-            if let Some(event) = event {
-                if let Some(event) = conrod::backend::winit::convert(event.clone(), &window) {
-                    ui.ui.handle_event(event);
-                }
-            }
-        }
-
-        ui.update(&window, &mut app);
-
-        if !(ui.menu_state || old_ui_menu_state) {
-            for event in events {
-                use glium::glutin::Event::*;
-                use glium::glutin::ElementState::*;
-                use glium::glutin::MouseButton::*;
-                match event {
-                    MouseInput(Pressed, Left) => app.do_jump(),
-                    _ => (),
-                }
-            }
-
-            app.update(dt);
-        }
+        app.update(dt);
 
         let mut target = window.draw();
         {
@@ -153,7 +131,6 @@ fn safe_main() -> Result<(), String> {
             let mut frame = graphics::Frame::new(&mut graphics, &mut target, &camera);
             frame.clear();
             app.draw(&mut frame);
-            ui.draw(&window, &mut frame.frame);
             draw_cursor(cursor, &mut frame);
         }
         target.finish().unwrap();

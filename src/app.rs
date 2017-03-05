@@ -39,12 +39,6 @@ impl App {
             must_quit: false,
         }
     }
-    pub fn toggle_fullscreen(&mut self) {
-        unimplemented!();
-    }
-    pub fn quit(&mut self) {
-        self.must_quit = true;
-    }
     pub fn camera(&self) -> graphics::Camera {
         graphics::Camera {
             x: self.ball.pos[0] as f32,

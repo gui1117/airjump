@@ -12,7 +12,7 @@ damping = 0.5
 ball_radius = 0.5
 
 [camera]
-zoom = 0.05
+zoom = 0.02
 
 [graphics]
 background_color = [1.0, 1.0, 1.0, 1.0]
@@ -21,9 +21,9 @@ wall_color = [0.0, 0.0, 0.0, 1.0]
 cursor_color = [1.0, 0.0, 0.0, 1.0]
 effect_color = [1.0, 0.0, 0.0, 1.0]
 
-cursor_inner_radius = 0.00003
-cursor_outer_radius = 0.00006
-cursor_thickness = 0.000015
+cursor_inner_radius = 0.00001
+cursor_outer_radius = 0.00002
+cursor_thickness = 0.000005
 
 effect_timer = 0.8
 effect_thickness = 0.4
