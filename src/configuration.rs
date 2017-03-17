@@ -11,6 +11,7 @@ pub struct Configuration {
     pub event_loop: EventLoop,
     pub control: Control,
     pub physics: Physics,
+    pub audio: Audio,
 }
 
 #[derive(RustcDecodable)]
@@ -56,6 +57,15 @@ pub struct EventLoop {
 #[derive(RustcDecodable)]
 pub struct Physics {
     pub unit: f64,
+}
+#[derive(RustcDecodable)]
+pub struct Audio {
+    pub jump_volume: f32,
+    pub wall_volume: f32,
+    pub gong_volume: f32,
+
+    pub wall_max_intensity: f64,
+    pub wall_min_intensity: f64,
 }
 
 const CONFIG_FILE: &'static str = "config.toml";

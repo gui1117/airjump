@@ -3,13 +3,14 @@ extern crate toml;
 extern crate rustc_serialize;
 extern crate svgparser;
 extern crate fnv;
-extern crate image;
 extern crate vecmath;
+extern crate rodio;
 #[macro_use] extern crate glium;
 #[macro_use] extern crate lazy_static;
 
 mod spatial_hashing;
 mod configuration;
+mod audio;
 pub mod math;
 mod app;
 mod map;
@@ -70,7 +71,9 @@ fn safe_main() -> Result<(), String> {
     window.get_window().unwrap().set_cursor_state(glutin::CursorState::Hide).unwrap();
     let mut graphics = graphics::Graphics::new(&window).unwrap();
 
-    let mut app = app::App::new();
+    let audio = audio::Audio::new().unwrap();
+
+    let mut app = app::App::new(audio);
 
     // Main loop
     //
@@ -87,6 +90,7 @@ fn safe_main() -> Result<(), String> {
             use glium::glutin::Event::*;
             use glium::glutin::ElementState;
             use glium::glutin::MouseButton;
+            use glium::glutin::TouchPhase;
             match event {
                 Closed => break 'main_loop,
                 MouseMoved(x, y) => {
@@ -105,6 +109,12 @@ fn safe_main() -> Result<(), String> {
                             cursor[1] = f64::max(-1./ratio, f64::min(cursor[1], 1./ratio));
                             app.set_jump_angle(cursor[1].atan2(cursor[0]) + ::std::f64::consts::PI);
                         }
+                    }
+                },
+                Touch(touch) => {
+                    if touch.phase == TouchPhase::Started {
+                        println!("x: {}, y: {}", touch.location.0, touch.location.1);
+                        // let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
                     }
                 },
                 MouseInput(ElementState::Pressed, MouseButton::Left) => app.do_jump(),

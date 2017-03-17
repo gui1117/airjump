@@ -4,6 +4,7 @@ use math::*;
 use physics::{Body, Shape};
 use spatial_hashing::SpatialHashing;
 use graphics::{self, Layer, Transformed};
+use audio::Audio;
 
 #[derive(Debug, Clone)]
 struct Effect {
@@ -21,10 +22,11 @@ pub struct App {
     effects: Vec<Effect>,
     jump_angle: f64,
     pub must_quit: bool,
+    audio: Audio,
 }
 
 impl App {
-    pub fn new() -> App {
+    pub fn new(audio: Audio) -> App {
         App {
             ball: Body {
                 pos: MAP.start,
@@ -37,6 +39,7 @@ impl App {
             effects: vec!(),
             air_jump: true,
             must_quit: false,
+            audio: audio,
         }
     }
     pub fn camera(&self) -> graphics::Camera {
@@ -107,7 +110,21 @@ impl App {
                 collision = collision.map_or(Some(c.clone()), |mut collision| {collision.push(c); Some(collision)});
             }
         }
+        // TODO check collision with gongs
+        // and play sound for each
+
         if let Some(collision) = collision {
+            let intensity = (self.ball_vel[0].powi(2) + self.ball_vel[1].powi(2)).sqrt();
+            let vol = if intensity >= CFG.audio.wall_max_intensity {
+                1.
+            } else if intensity <= CFG.audio.wall_min_intensity {
+                0.
+            } else {
+                (intensity - CFG.audio.wall_min_intensity) /
+                    (CFG.audio.wall_max_intensity - CFG.audio.wall_min_intensity)
+            };
+            self.audio.play_wall(vol as f32);
+
             self.ball.pos[0] += collision.dx;
             self.ball.pos[1] += collision.dy;
 
@@ -123,6 +140,8 @@ impl App {
     }
     pub fn do_jump(&mut self) {
         if self.air_jump {
+            self.audio.play_jump();
+
             self.air_jump = false;
             if CFG.gameplay.reset {
                 self.ball_vel = [0., 0.];

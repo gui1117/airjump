@@ -4,6 +4,14 @@ fullscreen = true
 vsync = true
 dimensions = [640, 480]
 
+[audio]
+jump_volume = 0.5
+wall_volume = 0.5
+gong_volume = 0.5
+
+wall_max_intensity = 8.0
+wall_min_intensity = 2.0
+
 [gameplay]
 gravity = 15.0
 impulse = 25.0

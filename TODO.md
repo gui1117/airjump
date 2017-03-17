@@ -1,8 +1,23 @@
+# high priority
+
+* touch events
+* emscrpiten
+* sounds
 * map
-* sound: on impact and on jump
-* music: something zen
-* ¿japan character?
+
+* yellow gong for reward and its sound?
+
+# low priority
+
+* joystick button events
+* joystick emscripten
 * focus
-* app events: touch, button, joystick, fullscreen, emscripten only things...
 * use immi
 * mouse sensibility must same as pc
+* ¿japan character?
+* music: something zen
+
+# snd
+
+http://soundbible.com/tags-gong.html
+http://www.universal-soundbank.com/gongs-soundbank.htm
