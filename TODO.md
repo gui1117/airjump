@@ -1,8 +1,7 @@
 # high priority
 
-* touch events
-* emscrpiten
-* sounds
+* sounds with sf2
+* touch events and only it
 * map
 
 * yellow gong for reward and its sound?
@@ -21,3 +20,9 @@
 
 http://soundbible.com/tags-gong.html
 http://www.universal-soundbank.com/gongs-soundbank.htm
+
+http://freewavesamples.com/e-mu-proteus-fx-shanai
+
+soundfont
+http://freesoundvault.com/ethnic/free-ethnic-sounds/
+http://beats.codenamehippie.com/samples/SoundFrontz/
