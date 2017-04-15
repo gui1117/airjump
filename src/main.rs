@@ -4,7 +4,7 @@ extern crate rustc_serialize;
 extern crate svgparser;
 extern crate fnv;
 extern crate vecmath;
-extern crate rodio;
+// extern crate rodio;
 #[macro_use] extern crate glium;
 #[macro_use] extern crate lazy_static;
 
