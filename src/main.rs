@@ -4,6 +4,7 @@ extern crate rustc_serialize;
 extern crate svgparser;
 extern crate fnv;
 extern crate vecmath;
+extern crate libc;
 // extern crate rodio;
 #[macro_use] extern crate glium;
 #[macro_use] extern crate lazy_static;
@@ -15,6 +16,7 @@ pub mod math;
 mod app;
 mod map;
 mod physics;
+pub mod backtrace_hack;
 pub mod graphics;
 
 use configuration::CFG;

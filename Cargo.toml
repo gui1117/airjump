@@ -17,6 +17,7 @@ fnv = "*"
 time = "*"
 fps_clock = "*"
 vecmath = "*"
+libc = "*"
 # rodio = "*"
 
 [replace]
