@@ -1,7 +1,6 @@
-use glium;
-use vecmath;
+extern crate vecmath;
 
-use glium::{Blend, Surface, VertexBuffer, index, vertex, Program, DrawParameters, Depth, DepthTest};
+use glium::{self, Blend, Surface, VertexBuffer, index, vertex, Program, DrawParameters, Depth, DepthTest};
 use glium::backend::{Facade, Context};
 use glium::backend::glutin_backend::GlutinFacade;
 use glium::program::ProgramCreationError;

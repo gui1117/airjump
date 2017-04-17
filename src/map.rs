@@ -1,4 +1,6 @@
-use svgparser::svg;
+extern crate svgparser;
+
+use self::svgparser::svg;
 use physics::{Body, Shape};
 use OkOrExit;
 
@@ -11,15 +13,15 @@ const MAP_FILE: &'static str = "map.svg";
 
 enum Error {
     Io(::std::io::Error),
-    Svg(::svgparser::Error),
+    Svg(svgparser::Error),
 }
 impl From<::std::io::Error> for Error {
     fn from(err: ::std::io::Error) -> Error {
         Error::Io(err)
     }
 }
-impl From<::svgparser::Error> for Error {
-    fn from(err: ::svgparser::Error) -> Error {
+impl From<svgparser::Error> for Error {
+    fn from(err: svgparser::Error) -> Error {
         Error::Svg(err)
     }
 }

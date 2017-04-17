@@ -1,4 +1,5 @@
-use toml;
+extern crate toml;
+
 use rustc_serialize::Decodable;
 use OkOrExit;
 
@@ -73,15 +74,15 @@ const CONFIG_FILE: &'static str = "config.toml";
 enum Error {
     Io(::std::io::Error),
     TomlParser(String),
-    TomlDecode(::toml::DecodeError),
+    TomlDecode(toml::DecodeError),
 }
 impl From<::std::io::Error> for Error {
     fn from(err: ::std::io::Error) -> Error {
         Error::Io(err)
     }
 }
-impl From<::toml::DecodeError> for Error {
-    fn from(err: ::toml::DecodeError) -> Error {
+impl From<toml::DecodeError> for Error {
+    fn from(err: toml::DecodeError) -> Error {
         Error::TomlDecode(err)
     }
 }

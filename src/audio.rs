@@ -1,3 +1,5 @@
+// extern crate rodio;
+
 pub struct Audio {
 }
 
