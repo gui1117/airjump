@@ -7,6 +7,12 @@ mod spatial_hashing;
 mod configuration;
 mod audio;
 pub mod math;
+#[cfg(target_os = "emscritpen")]
+#[path="emscripten_audio.rs"]
+mod audio;
+#[cfg(all(not(target_os = "emscripten")))]
+#[path="rodio_audio.rs"]
+mod audio;
 mod app;
 mod map;
 mod physics;
