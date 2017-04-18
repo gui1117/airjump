@@ -1,5 +1,6 @@
 # high priority
 
+* emscripten loop
 * sounds with sf2
 * touch events and only it
 * map
