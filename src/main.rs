@@ -5,9 +5,8 @@ extern crate rustc_serialize;
 
 mod spatial_hashing;
 mod configuration;
-mod audio;
 pub mod math;
-#[cfg(target_os = "emscritpen")]
+#[cfg(target_os = "emscripten")]
 #[path="emscripten_audio.rs"]
 mod audio;
 #[cfg(all(not(target_os = "emscripten")))]
@@ -18,6 +17,8 @@ mod map;
 mod physics;
 pub mod backtrace_hack;
 pub mod graphics;
+#[cfg(target_os = "emscripten")]
+mod emscripten;
 
 use configuration::CFG;
 
@@ -77,24 +78,15 @@ fn safe_main() -> Result<(), String> {
 
     let mut app = app::App::new(audio);
 
-    // Main loop
-    //
-    // If running out of time then slow down the game
-
-    let mut fps_clock = fps_clock::FpsClock::new(CFG.event_loop.max_fps);
-    let dt = 1.0 / CFG.event_loop.max_fps as f64;
-
-
-    'main_loop: loop {
-
-
+    // return whereas main loop breaks
+    set_main_loop(|dt| -> bool {
         for event in window.poll_events() {
             use glium::glutin::Event::*;
             use glium::glutin::ElementState;
             use glium::glutin::MouseButton;
             use glium::glutin::TouchPhase;
             match event {
-                Closed => break 'main_loop,
+                Closed => return true,
                 MouseMoved(x, y) => {
                     let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
                     if let Ok(()) = window.get_window().unwrap().set_cursor_position((w/2) as i32, (h/2) as i32) {
@@ -147,14 +139,35 @@ fn safe_main() -> Result<(), String> {
         }
         target.finish().unwrap();
 
-        if app.must_quit {
-            break 'main_loop;
-        }
-
-        fps_clock.tick();
-    }
+        return app.must_quit
+    });
 
     Ok(())
+}
+
+#[cfg(target_os = "emscripten")]
+fn set_main_loop<F: FnMut(f64) -> bool>(mut main_loop: F) {
+    let dt = 1.0 / 60f64;
+    emscripten::set_main_loop_callback(|| {
+        if main_loop(dt) {
+            emscripten::cancel_main_loop();
+        }
+    });
+}
+
+// behavior differ from emscripten as it doesn't return
+// as long as the main loop doesn't end
+#[cfg(all(not(target_os = "emscripten")))]
+fn set_main_loop<F: FnMut(f64) -> bool>(mut main_loop: F) {
+    // If running out of time then slow down the game
+    let mut fps_clock = fps_clock::FpsClock::new(CFG.event_loop.max_fps);
+    let dt = 1.0 / CFG.event_loop.max_fps as f64;
+    loop {
+        if main_loop(dt) {
+            break
+        }
+        fps_clock.tick();
+    }
 }
 
 fn draw_cursor(cursor: [f64; 2], frame: &mut graphics::Frame) {

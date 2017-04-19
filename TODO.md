@@ -1,6 +1,7 @@
 # high priority
 
-* emscripten loop
+* emscripten fullscreen strategy
+* emscripten touch
 * sounds with sf2
 * touch events and only it
 * map
