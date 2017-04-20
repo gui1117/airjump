@@ -103,9 +103,9 @@ function request_pointer_lock() {
 	</head>
 	<body onresize="resize_canvas()">
 		<div id="spinner"></div>
-		<span id='controls'>
-			<span><input type="button" value="Fullscreen" onclick="toggleFullScreen()"></span>
-		</span>
+		<!-- <span id='controls'> -->
+		<!-- 	<span><input type="button" value="Fullscreen" onclick="toggleFullScreen()"></span> -->
+		<!-- </span> -->
 
 		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 
@@ -138,6 +138,6 @@ var Module = {
 	},
 };
 		</script>
-		<script async type="text/javascript"  src="target/asmjs-unknown-emscripten/release/triangle.js"></script>
+		<script async type="text/javascript"  src="target/asmjs-unknown-emscripten/release/airjump.js"></script>
 	</body>
 </html>

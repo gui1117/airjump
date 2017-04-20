@@ -3,8 +3,7 @@ extern crate vecmath;
 use glium::{self, Blend, Surface, VertexBuffer, index, vertex, Program, DrawParameters, Depth, DepthTest};
 use glium::backend::{Facade, Context};
 use glium::backend::glutin_backend::GlutinFacade;
-use glium::program::ProgramCreationError;
-use glium::draw_parameters::Smooth;
+use glium::program::ProgramChooserCreationError;
 
 use std::error::Error;
 use std::fmt;
@@ -87,7 +86,7 @@ pub struct Graphics {
 
 #[derive(Debug)]
 pub enum GraphicsError {
-    ProgramCreation(ProgramCreationError),
+    ProgramChooserCreation(ProgramChooserCreationError),
     VertexBufferCreation(vertex::BufferCreationError),
     IndexBufferCreation(index::BufferCreationError),
 }
@@ -96,7 +95,7 @@ impl Error for GraphicsError {
     fn description(&self) -> &str {
         use self::GraphicsError::*;
         match *self {
-            ProgramCreation(ref err) => err.description(),
+            ProgramChooserCreation(ref err) => err.description(),
             VertexBufferCreation(ref err) => err.description(),
             IndexBufferCreation(ref err) => err.description(),
         }
@@ -104,7 +103,7 @@ impl Error for GraphicsError {
     fn cause(&self) -> Option<&Error> {
         use self::GraphicsError::*;
         match *self {
-            ProgramCreation(ref e) => e.cause(),
+            ProgramChooserCreation(ref e) => e.cause(),
             VertexBufferCreation(ref e) => e.cause(),
             IndexBufferCreation(ref e) => e.cause(),
         }
@@ -114,15 +113,15 @@ impl fmt::Display for GraphicsError {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         use self::GraphicsError::*;
         match *self {
-            ProgramCreation(ref e) => write!(fmt, "Glium program creation error: {}", e),
+            ProgramChooserCreation(ref e) => write!(fmt, "Glium program chooser creation error: {}", e),
             VertexBufferCreation(ref e) => write!(fmt, "Glium vertex buffer creation error: {}", e),
             IndexBufferCreation(ref e) => write!(fmt, "Glium index buffer creation error: {}", e),
         }
     }
 }
-impl From<ProgramCreationError> for GraphicsError {
-    fn from(err: ProgramCreationError) -> GraphicsError {
-        GraphicsError::ProgramCreation(err)
+impl From<ProgramChooserCreationError> for GraphicsError {
+    fn from(err: ProgramChooserCreationError) -> GraphicsError {
+        GraphicsError::ProgramChooserCreation(err)
     }
 }
 impl From<index::BufferCreationError> for GraphicsError {
@@ -162,8 +161,8 @@ impl Graphics {
         let circle_indices = index::NoIndices(index::PrimitiveType::TriangleFan);
 
         let vertex_shader_src = r#"
-            #version 150
-            in vec2 position;
+            #version 100
+            attribute vec2 position;
             uniform mat4 trans;
             uniform mat4 camera;
             void main() {
@@ -172,17 +171,21 @@ impl Graphics {
             }
         "#;
         let fragment_shader_src = r#"
-            #version 150
-            out vec4 out_color;
+            #version 100
+            precision mediump float;
             uniform vec4 color;
             void main() {
-                out_color = color;
+                gl_FragColor = color;
             }
         "#;
-        let program = Program::from_source(facade, vertex_shader_src, fragment_shader_src, None)?;
+        let program = program!(facade,
+            100 => {
+                vertex: vertex_shader_src,
+                fragment: fragment_shader_src,
+            },
+        )?;
 
         let draw_parameters = DrawParameters {
-            smooth: Some(Smooth::DontCare),
             blend: Blend::alpha_blending(),
             depth: Depth {
                 test: DepthTest::IfMoreOrEqual,
