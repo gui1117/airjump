@@ -1,3 +1,5 @@
+extern "C" { fn emscripten_asm_const(code: *const ::std::os::raw::c_char); }
+
 pub struct Audio {
 }
 

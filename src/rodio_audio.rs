@@ -42,7 +42,7 @@ impl ::std::fmt::Display for Error {
 type FileType = Vec<u8>;
 
 #[cfg(not(feature = "include_all"))]
-fn read_snd_files() -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
+fn read_snd_files() -> Result<(Vec<u8>, Vec<u8>), Error> {
     use std::fs::File;
     use std::io::Read;
     let mut wall = Vec::new();
@@ -51,28 +51,23 @@ fn read_snd_files() -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
     let mut jump = Vec::new();
     CURRENT_SND.with(|cell| cell.set("sounds/jump.ogg"));
     File::open("sounds/jump.ogg")?.read_to_end(&mut jump)?;
-    let mut gong = Vec::new();
-    CURRENT_SND.with(|cell| cell.set("sounds/gong.ogg"));
-    File::open("sounds/gong.ogg")?.read_to_end(&mut gong)?;
-    Ok((wall, jump, gong))
+    Ok((wall, jump))
 }
 
 #[cfg(feature = "include_all")]
 type FileType = &'static [u8];
 
 #[cfg(feature = "include_all")]
-fn read_snd_files() -> Result<(&'static [u8], &'static [u8], &'static [u8]), Error> {
-    let wall = include_bytes!("sounds/wall.ogg");
-    let jump = include_bytes!("sounds/jump.ogg");
-    let gong = include_bytes!("sounds/gong.ogg");
-    Ok((wall, jump, gong))
+fn read_snd_files() -> Result<(&'static [u8], &'static [u8]), Error> {
+    let wall = include_bytes!("../sounds/wall.ogg");
+    let jump = include_bytes!("../sounds/jump.ogg");
+    Ok((wall, jump))
 }
 
 pub struct Audio {
     endpoint: rodio::Endpoint,
     wall: Buffered<Amplify<Decoder<io::Cursor<FileType>>>>,
     jump: Buffered<Amplify<Decoder<io::Cursor<FileType>>>>,
-    // gong: Buffered<Amplify<Decoder<io::Cursor<FileType>>>>,
 }
 
 impl Audio {
@@ -86,9 +81,6 @@ impl Audio {
             jump: Decoder::new(io::Cursor::new(snds.1))?
                 .amplify(CFG.audio.jump_volume)
                 .buffered(),
-            // gong: Decoder::new(io::Cursor::new(snds.2))?
-            //     .amplify(CFG.audio.gong_volume)
-            //     .buffered(),
         })
     }
 
@@ -105,10 +97,4 @@ impl Audio {
             sink.detach();
         }
     }
-
-    // pub fn play_gong(&self) {
-    //     let sink = rodio::Sink::new(&self.endpoint);
-    //     sink.append(self.gong.clone());
-    //     sink.detach();
-    // }
 }

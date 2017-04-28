@@ -63,7 +63,6 @@ pub struct Physics {
 pub struct Audio {
     pub jump_volume: f32,
     pub wall_volume: f32,
-    pub gong_volume: f32,
 
     pub wall_max_intensity: f64,
     pub wall_min_intensity: f64,
