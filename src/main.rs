@@ -116,6 +116,7 @@ fn safe_main() -> Result<(), String> {
                     }
                 },
                 MouseInput(ElementState::Pressed, MouseButton::Left) => app.do_jump(),
+                MouseInput(ElementState::Pressed, MouseButton::Right) => app.do_unlimited_jump(),
                 Refresh => {
                     let mut target = window.draw();
                     {

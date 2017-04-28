@@ -138,22 +138,25 @@ impl App {
             self.air_jump = true;
         }
     }
+    pub fn do_unlimited_jump(&mut self) {
+        self.audio.play_jump();
+
+        if CFG.gameplay.reset {
+            self.ball_vel = [0., 0.];
+        }
+        self.ball_vel[0] += self.jump_angle.cos()*CFG.gameplay.impulse;
+        self.ball_vel[1] += self.jump_angle.sin()*CFG.gameplay.impulse;
+
+        self.effects.push(Effect {
+            pos: [self.ball.pos[0], self.ball.pos[1]],
+            angle: self.jump_angle,
+            timer: CFG.graphics.effect_timer,
+        });
+    }
     pub fn do_jump(&mut self) {
         if self.air_jump {
-            self.audio.play_jump();
-
             self.air_jump = false;
-            if CFG.gameplay.reset {
-                self.ball_vel = [0., 0.];
-            }
-            self.ball_vel[0] += self.jump_angle.cos()*CFG.gameplay.impulse;
-            self.ball_vel[1] += self.jump_angle.sin()*CFG.gameplay.impulse;
-
-            self.effects.push(Effect {
-                pos: [self.ball.pos[0], self.ball.pos[1]],
-                angle: self.jump_angle,
-                timer: CFG.graphics.effect_timer,
-            });
+            self.do_unlimited_jump()
         }
     }
     pub fn set_jump_angle(&mut self, angle: f64) {
