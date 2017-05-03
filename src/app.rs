@@ -1,7 +1,7 @@
 use configuration::CFG;
 use map::MAP;
 use math::*;
-use physics::{Body, Shape};
+use physics::{Body, Shape, Collision};
 use spatial_hashing::SpatialHashing;
 use graphics::{self, Layer, Transformed};
 use audio::Audio;
@@ -107,7 +107,7 @@ impl App {
         let mut collision = None;
         for w in &self.walls.get_on_body(&self.ball) {
             if let Some(c) = self.ball.collide(w) {
-                collision = collision.map_or(Some(c.clone()), |mut collision| {collision.push(c); Some(collision)});
+                collision = collision.map_or(Some(c.clone()), |mut collision: Collision| {collision.push(c); Some(collision)});
             }
         }
         // TODO check collision with gongs
