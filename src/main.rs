@@ -1,7 +1,8 @@
 extern crate fps_clock;
-extern crate rustc_serialize;
 #[macro_use] extern crate glium;
 #[macro_use] extern crate lazy_static;
+#[macro_use] extern crate serde_derive;
+extern crate serde;
 
 mod spatial_hashing;
 mod configuration;

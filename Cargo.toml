@@ -8,8 +8,9 @@ default = []
 include_all = [] # include map.svg and config.toml into the binary
 
 [dependencies]
-rustc-serialize = "*"
-toml = "0.2"
+serde = "1.0"
+serde_derive = "1.0"
+toml = "*"
 lazy_static = "*"
 glium = "*"
 svgparser = "*"
