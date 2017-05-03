@@ -79,18 +79,6 @@ function toggleFullScreen() {
 		}
 	}
 }
-function resize_canvas() {
-	var canvas = document.getElementById("canvas");
-	if (canvas.width  < window.innerWidth)
-	{
-		canvas.width  = window.innerWidth;
-	}
-
-	if (canvas.height < window.innerHeight)
-	{
-		canvas.height = window.innerHeight;
-	}
-}
 function request_pointer_lock() {
 	var canvas = document.getElementById("canvas");
 
@@ -101,14 +89,9 @@ function request_pointer_lock() {
 }
 		</script>
 	</head>
-	<body onresize="resize_canvas()">
+	<body>
 		<div id="spinner"></div>
-		<!-- <span id='controls'> -->
-		<!-- 	<span><input type="button" value="Fullscreen" onclick="toggleFullScreen()"></span> -->
-		<!-- </span> -->
-
 		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-
 		<script type='text/javascript'>
 var spinnerElement = document.getElementById('spinner');
 var Module = {

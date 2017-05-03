@@ -19,7 +19,7 @@ mod physics;
 pub mod backtrace_hack;
 pub mod graphics;
 #[cfg(target_os = "emscripten")]
-mod emscripten;
+pub mod emscripten;
 
 use configuration::CFG;
 
@@ -47,22 +47,39 @@ fn main() {
 }
 
 fn safe_main() -> Result<(), String> {
+    emscripten::request_soft_fullscreen_strategy();
     let mut builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
 
-    if CFG.window.fullscreen {
-        builder = builder.with_fullscreen(glutin::get_primary_monitor());
+    let (fullscreen, dimensions, vsync, samples) = if cfg!(target_os = "emscripten") {
+        (
+            false,
+            None,
+            true,
+            2,
+        )
     } else {
-        let width = CFG.window.dimensions[0];
-        let height = CFG.window.dimensions[1];
+        (
+            CFG.window.fullscreen,
+            Some(CFG.window.dimensions),
+            CFG.window.vsync,
+            CFG.window.samples,
+        )
+    };
+
+    if fullscreen {
+        builder = builder.with_fullscreen(glutin::get_primary_monitor());
+    } else if let Some(dimensions) = dimensions {
+        let width = dimensions[0];
+        let height = dimensions[1];
         builder = builder.with_dimensions(width, height);
     }
-    if CFG.window.vsync {
+    if vsync {
         builder = builder.with_vsync();
     }
-    if CFG.window.samples > 0 && CFG.window.samples.is_power_of_two() {
-        builder = builder.with_multisampling(CFG.window.samples as u16);
+    if samples > 0 && samples.is_power_of_two() {
+        builder = builder.with_multisampling(samples as u16);
     } else {
         panic!("multisampling invalid");
     }

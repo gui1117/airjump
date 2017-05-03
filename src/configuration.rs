@@ -18,6 +18,7 @@ pub struct Configuration {
 pub struct Control {
     pub mouse_sensibility: f64,
 }
+/// Those setting are not taking into account for emscripten backend
 #[derive(Deserialize)]
 pub struct Window {
     pub samples: u8,
