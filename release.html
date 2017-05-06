@@ -62,32 +62,6 @@ canvas.emscripten {
 	height: 100%;
 }
 		</style>
-		<script type="text/javascript">
-function toggleFullScreen() {
-	var canvas = document.getElementById('canvas');
-	if (!document.mozFullScreen && !document.webkitFullScreen) {
-		if (canvas.mozRequestFullScreen) {
-			canvas.mozRequestFullScreen();
-		} else {
-			canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-		}
-	} else {
-		if (document.mozCancelFullScreen) {
-			document.mozCancelFullScreen();
-		} else {
-			document.webkitCancelFullScreen();
-		}
-	}
-}
-function request_pointer_lock() {
-	var canvas = document.getElementById("canvas");
-
-	canvas.requestPointerLock = canvas.requestPointerLock ||
-		canvas.mozRequestPointerLock;
-
-	canvas.requestPointerLock();
-}
-		</script>
 	</head>
 	<body>
 		<div id="spinner"></div>
@@ -121,6 +95,10 @@ var Module = {
 	},
 };
 		</script>
-		<script async type="text/javascript"  src="target/asmjs-unknown-emscripten/release/airjump.js"></script>
+		<script async type="text/javascript"  src="emscripten_audio.js"></script>
+		<script async type="text/javascript"  src="airjump.js"></script>
+		 <audio autoplay loop>
+			<source src="background.mp3" type="audio/mp3">
+		 </audio>
 	</body>
 </html>

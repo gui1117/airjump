@@ -1,5 +1,3 @@
-//! The html document must have a video element with all sources
-
 extern "C" { fn emscripten_asm_const(code: *const ::std::os::raw::c_char); }
 
 pub struct Audio {
@@ -15,8 +13,14 @@ impl Audio {
     }
 
     pub fn play_jump(&self) {
+        unsafe {
+            emscripten_asm_const(b"play_jump()" as *const u8);
+        }
     }
 
     pub fn play_wall(&self, _vol: f32) {
+        unsafe {
+            emscripten_asm_const(b"play_wall()" as *const u8);
+        }
     }
 }

@@ -47,7 +47,9 @@ fn main() {
 }
 
 fn safe_main() -> Result<(), String> {
-    emscripten::request_soft_fullscreen_strategy();
+    if cfg!(target_os = "emscrpiten") {
+        emscripten::request_soft_fullscreen_strategy();
+    }
     let mut builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
