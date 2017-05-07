@@ -66,10 +66,15 @@ canvas.emscripten {
 			<source src="background.mp3" type="audio/mp3">
 		 </audio>
 	</head>
-	<body>
+	<body onresize="resize_canvas()">
 		<div id="spinner"></div>
 		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 		<script type='text/javascript'>
+function resize_canvas() {
+	var canvas = document.getElementById("canvas");
+	canvas.width  = window.innerWidth;
+	canvas.height = window.innerHeight;
+}
 function start_background_music() {
 	audio = document.getElementById("background_music");
 	audio.play();

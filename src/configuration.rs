@@ -33,6 +33,8 @@ pub struct Gameplay {
     pub damping: f64,
     pub impulse: f64,
     pub reset: bool,
+    pub set_mouse: bool,
+    pub set_unlimited: bool,
 }
 #[derive(Deserialize)]
 pub struct Graphics {
