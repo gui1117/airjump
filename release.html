@@ -62,14 +62,21 @@ canvas.emscripten {
 	height: 100%;
 }
 		</style>
+		 <audio id="background_music" loop>
+			<source src="background.mp3" type="audio/mp3">
+		 </audio>
 	</head>
 	<body>
 		<div id="spinner"></div>
 		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 		<script type='text/javascript'>
+function start_background_music() {
+	audio = document.getElementById("background_music");
+	audio.play();
+}
 var spinnerElement = document.getElementById('spinner');
 var Module = {
-	preRun: [],
+	preRun: [start_background_music],
 	postRun: [],
 	print: (function() {
 		return function(text) {
@@ -97,8 +104,5 @@ var Module = {
 		</script>
 		<script async type="text/javascript"  src="emscripten_audio.js"></script>
 		<script async type="text/javascript"  src="airjump.js"></script>
-		 <audio autoplay loop>
-			<source src="background.mp3" type="audio/mp3">
-		 </audio>
 	</body>
 </html>

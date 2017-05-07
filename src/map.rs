@@ -106,37 +106,37 @@ fn load_map() -> Result<Map, Error> {
             },
             svg::Token::Attribute(b"cx", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.1 = Some(value.parse_number().unwrap());
+                    circle.1 = Some(value.parse_number()?);
                 }
             },
             svg::Token::Attribute(b"cy", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.2 = Some(-value.parse_number().unwrap());
+                    circle.2 = Some(-value.parse_number()?);
                 }
             },
             svg::Token::Attribute(b"r", mut value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.3 = Some(value.parse_number().unwrap());
+                    circle.3 = Some(value.parse_number()?);
                 }
             },
             svg::Token::Attribute(b"x", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.0 = Some(value.parse_number().unwrap());
+                    rect.0 = Some(value.parse_number()?);
                 }
             },
             svg::Token::Attribute(b"y", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.1 = Some(-value.parse_number().unwrap());
+                    rect.1 = Some(-value.parse_number()?);
                 }
             },
             svg::Token::Attribute(b"width", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.2 = Some(value.parse_number().unwrap());
+                    rect.2 = Some(value.parse_number()?);
                 }
             },
             svg::Token::Attribute(b"height", mut value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.3 = Some(value.parse_number().unwrap());
+                    rect.3 = Some(value.parse_number()?);
                 }
             },
             svg::Token::EndOfStream => break,

@@ -7,6 +7,12 @@ pub struct Audio {
 pub enum Error {
 }
 
+impl ::std::fmt::Display for Error {
+    fn fmt(&self, _fmt: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+        Ok(())
+    }
+}
+
 impl Audio {
     pub fn new() -> Result<Audio, Error> {
         Ok(Audio {})

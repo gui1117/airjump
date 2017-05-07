@@ -47,9 +47,7 @@ fn main() {
 }
 
 fn safe_main() -> Result<(), String> {
-    if cfg!(target_os = "emscrpiten") {
-        emscripten::request_soft_fullscreen_strategy();
-    }
+    configure_fullscreen_strategy();
     let mut builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
@@ -86,15 +84,15 @@ fn safe_main() -> Result<(), String> {
         panic!("multisampling invalid");
     }
 
-    let window = builder.build_glium().unwrap();
+    let window = builder.build_glium().map_err(|e| format!("build glium: {}", e))?;
 
     let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
     let mut cursor = [w as f64/2., h as f64/2.];
     window.get_window().unwrap().set_cursor_position(cursor[0] as i32, cursor[1] as i32).unwrap();
     window.get_window().unwrap().set_cursor_state(glutin::CursorState::Hide).unwrap();
-    let mut graphics = graphics::Graphics::new(&window).unwrap();
+    let mut graphics = graphics::Graphics::new(&window).map_err(|e| format!("graphics: {}", e))?;
 
-    let audio = audio::Audio::new().unwrap();
+    let audio = audio::Audio::new().map_err(|e| format!("audio: {}", e))?;
 
     let mut app = app::App::new(audio);
 
@@ -168,6 +166,15 @@ fn safe_main() -> Result<(), String> {
     });
 
     Ok(())
+}
+
+#[cfg(target_os = "emscripten")]
+fn configure_fullscreen_strategy() {
+    emscripten::request_soft_fullscreen_strategy();
+}
+
+#[cfg(not(target_os = "emscripten"))]
+fn configure_fullscreen_strategy() {
 }
 
 #[cfg(target_os = "emscripten")]

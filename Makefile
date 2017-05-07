@@ -1,3 +1,6 @@
+check:
+	cargo check --target asmjs-unknown-emscripten --release --features include_all
+
 build:
 	cargo build --target asmjs-unknown-emscripten --release --features include_all
 	cp target/asmjs-unknown-emscripten/release/airjump.js target/publication/html/
@@ -11,5 +14,5 @@ run: build
 	firefox target/publication/html/index.html
 
 doc:
-	cargo doc --open
+	cargo doc --open &
 	rustup doc
