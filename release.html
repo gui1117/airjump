@@ -62,9 +62,6 @@ canvas.emscripten {
 	height: 100%;
 }
 		</style>
-		 <audio id="background_music" loop>
-			<source src="background.mp3" type="audio/mp3">
-		 </audio>
 	</head>
 	<body onresize="resize_canvas()">
 		<div id="spinner"></div>
@@ -75,13 +72,9 @@ function resize_canvas() {
 	canvas.width  = window.innerWidth;
 	canvas.height = window.innerHeight;
 }
-function start_background_music() {
-	audio = document.getElementById("background_music");
-	audio.play();
-}
 var spinnerElement = document.getElementById('spinner');
 var Module = {
-	preRun: [start_background_music],
+	preRun: [],
 	postRun: [],
 	print: (function() {
 		return function(text) {

@@ -139,7 +139,7 @@ fn safe_main() -> Result<(), String> {
                         println!("x: {}, y: {}", touch.location.0, touch.location.1);
                         let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
                         let x = touch.location.0 - (w/2) as f64;
-                        let y = touch.location.1 - (h/2) as f64;
+                        let y = - (touch.location.1 - (h/2) as f64);
                         app.set_jump_angle(y.atan2(x) + ::std::f64::consts::PI);
                         app.do_jump();
                     }

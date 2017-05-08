@@ -8,7 +8,6 @@ build:
 	cp release.html target/publication/html/index.html
 	cp sounds/jump.ogg target/publication/html/
 	cp sounds/wall.ogg target/publication/html/
-	cp sounds/background.mp3 target/publication/html/
 
 run: build
 	firefox target/publication/html/index.html
