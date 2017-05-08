@@ -10,9 +10,6 @@ use std::fmt;
 use std::rc::Rc;
 use std::f32::consts::PI;
 
-// GLSL version is 150 even if 130 would be OK
-// but macos seem to have issue with 130 so ...
-
 pub type Transformation = vecmath::Matrix2x3<f32>;
 
 const CIRCLE_PRECISION: usize = 64;
