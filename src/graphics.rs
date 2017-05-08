@@ -236,8 +236,13 @@ impl<'a> Frame<'a> {
         let ratio = width as f32 / height as f32;
 
         let camera_matrix = {
-            let kx = camera.zoom;
-            let ky = camera.zoom * ratio;
+            let (kx, ky) = if ratio > 1. {
+                (camera.zoom / ratio,
+                 camera.zoom)
+            } else {
+                (camera.zoom,
+                 camera.zoom * ratio)
+            };
             let dx = -camera.x;
             let dy = -camera.y;
             [[     kx,      0., 0., 0.],

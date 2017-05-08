@@ -22,7 +22,7 @@ set_mouse = false
 set_unlimited = false
 
 [camera]
-zoom = 0.02
+zoom = 0.03
 
 [graphics]
 background_color = [1.0, 1.0, 1.0, 1.0]
