@@ -2,6 +2,7 @@ check:
 	cargo check --target asmjs-unknown-emscripten --release --features include_all
 
 build:
+	rm -rf target/publication/html/*
 	cargo build --target asmjs-unknown-emscripten --release --features include_all
 	cp target/asmjs-unknown-emscripten/release/airjump.js target/publication/html/
 	cp src/emscripten_audio.js target/publication/html/emscripten_audio.js
@@ -11,6 +12,9 @@ build:
 
 run: build
 	firefox target/publication/html/index.html
+
+publish: build
+	butler push target/publication/html/ rope/airjump:html
 
 doc:
 	cargo doc --open &

@@ -47,6 +47,7 @@ fn main() {
 }
 
 fn safe_main() -> Result<(), String> {
+    configure_fullscreen_strategy();
     let mut builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
@@ -183,6 +184,15 @@ fn safe_main() -> Result<(), String> {
     });
 
     Ok(())
+}
+
+#[cfg(target_os = "emscripten")]
+fn configure_fullscreen_strategy() {
+    emscripten::request_soft_fullscreen_strategy();
+}
+
+#[cfg(not(target_os = "emscripten"))]
+fn configure_fullscreen_strategy() {
 }
 
 #[cfg(target_os = "emscripten")]
