@@ -85,16 +85,13 @@ impl Audio {
     }
 
     pub fn play_jump(&self) {
-        let sink = rodio::Sink::new(&self.endpoint);
-        sink.append(self.jump.clone());
-        sink.detach();
+        rodio::play_raw(&self.endpoint, self.jump.clone().convert_samples());
     }
 
     pub fn play_wall(&self, vol: f32) {
         if vol > 0. {
-            let sink = rodio::Sink::new(&self.endpoint);
-            sink.append(self.wall.clone().amplify(vol));
-            sink.detach();
+            let source = self.wall.clone().amplify(vol);
+            rodio::play_raw(&self.endpoint, source.convert_samples());
         }
     }
 }
