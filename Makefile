@@ -1,9 +1,9 @@
 check:
-	cargo check --target asmjs-unknown-emscripten --release --features include_all
+	cargo check --target asmjs-unknown-emscripten --release
 
 build:
 	rm -rf target/publication/html/*
-	cargo build --target asmjs-unknown-emscripten --release --features include_all
+	cargo build --target asmjs-unknown-emscripten --release
 	cp target/asmjs-unknown-emscripten/release/airjump.js target/publication/html/
 	cp src/emscripten_audio.js target/publication/html/emscripten_audio.js
 	cp release.html target/publication/html/index.html
@@ -24,7 +24,7 @@ android_log:
 	~/android-sdk-linux/platform-tools/adb logcat | grep -ie AndroidGLue
 
 android_build:
-	sudo docker run --rm -v `pwd`:/root/src -w /root/src tomaka/android-rs-glue cargo apk --features include_all
+	sudo docker run --rm -v `pwd`:/root/src -w /root/src tomaka/android-rs-glue cargo apk
 
 android_install:
 	~/android-sdk-linux/platform-tools/adb install -r target/android-artifacts/build/bin/airjump-debug.apk

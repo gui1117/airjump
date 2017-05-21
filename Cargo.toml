@@ -5,7 +5,7 @@ authors = ["thiolliere <guillaume.thiolliere@opmbx.org>"]
 
 [features]
 default = []
-include_all = [] # include map.svg and config.toml into the binary
+exclude_all = [] # exclude map.svg and config.toml from the binary
 
 [dependencies]
 serde = "1.0"

@@ -38,10 +38,10 @@ impl ::std::fmt::Display for Error {
     }
 }
 
-#[cfg(not(feature = "include_all"))]
+#[cfg(feature = "exclude_all")]
 type FileType = Vec<u8>;
 
-#[cfg(not(feature = "include_all"))]
+#[cfg(feature = "exclude_all")]
 fn read_snd_files() -> Result<(Vec<u8>, Vec<u8>), Error> {
     use std::fs::File;
     use std::io::Read;
@@ -54,10 +54,10 @@ fn read_snd_files() -> Result<(Vec<u8>, Vec<u8>), Error> {
     Ok((wall, jump))
 }
 
-#[cfg(feature = "include_all")]
+#[cfg(not(feature = "exclude_all"))]
 type FileType = &'static [u8];
 
-#[cfg(feature = "include_all")]
+#[cfg(not(feature = "exclude_all"))]
 fn read_snd_files() -> Result<(&'static [u8], &'static [u8]), Error> {
     let wall = include_bytes!("../sounds/wall.ogg");
     let jump = include_bytes!("../sounds/jump.ogg");

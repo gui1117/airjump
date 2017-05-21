@@ -35,7 +35,7 @@ impl ::std::fmt::Display for Error {
     }
 }
 
-#[cfg(not(feature = "include_all"))]
+#[cfg(feature = "exclude_all")]
 fn read_map_file() -> Result<Vec<u8>, Error> {
     use std::fs::File;
     use std::io::Read;
@@ -44,7 +44,7 @@ fn read_map_file() -> Result<Vec<u8>, Error> {
     Ok(map)
 }
 
-#[cfg(feature = "include_all")]
+#[cfg(not(feature = "exclude_all"))]
 fn read_map_file() -> Result<&'static [u8], Error> {
     Ok(include_bytes!("../map.svg"))
 }

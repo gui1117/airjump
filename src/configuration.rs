@@ -96,7 +96,7 @@ impl ::std::fmt::Display for Error {
     }
 }
 
-#[cfg(not(feature = "include_all"))]
+#[cfg(feature = "exclude_all")]
 fn read_configuration_file() -> Result<String, Error> {
     use std::fs::File;
     use std::io::Read;
@@ -105,7 +105,7 @@ fn read_configuration_file() -> Result<String, Error> {
     Ok(config)
 }
 
-#[cfg(feature = "include_all")]
+#[cfg(not(feature = "exclude_all"))]
 fn read_configuration_file() -> Result<&'static str, Error> {
     Ok(include_str!("../config.toml"))
 }
