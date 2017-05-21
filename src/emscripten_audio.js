@@ -56,10 +56,10 @@ function onLoaded(buffers) {
 
 loader.load();
 
-function play(index) {
+function play(index, volume) {
     var source = context.createBufferSource();
     var gain = context.createGain();
-    gain.gain.value = 0.2;
+    gain.gain.value = volume;
     source.buffer = context.buffers[index];
     source.connect(gain);
 
@@ -73,10 +73,10 @@ function play(index) {
     source.start();
 }
 
-function play_jump() {
-	play(0)
+function play_jump(vol) {
+	play(0, vol)
 }
 
-function play_wall() {
-	play(1)
+function play_wall(vol) {
+	play(1, vol)
 }
