@@ -1,6 +1,5 @@
 # high priority
 
-* update winit, update emscripten fork of glutin ...
 * amplify for emscripten audio
 * debug rodio
 * sound choice

@@ -24,9 +24,9 @@ impl Audio {
         }
     }
 
-    pub fn play_wall(&self, _vol: f32) {
+    pub fn play_wall(&self, vol: f32) {
         unsafe {
-            emscripten_asm_const(b"play_wall()" as *const u8);
+            emscripten_asm_const(format!(b"play_wall({})", vol) as *const u8);
         }
     }
 }

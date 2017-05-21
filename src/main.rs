@@ -43,6 +43,7 @@ impl<T, E: ::std::fmt::Display> OkOrExit for Result<T,E> {
 }
 
 fn main() {
+    std::env::set_var("RUSTC_BACKTRACE", "1");
     safe_main().ok_or_exit();
 }
 
