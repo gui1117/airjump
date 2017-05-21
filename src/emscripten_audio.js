@@ -48,7 +48,7 @@ BufferLoader.prototype.load = function() {
         this.loadBuffer(this.urlList[i], i);
 };
 
-var loader = new BufferLoader(context, ['jump.ogg', 'wall.ogg'], onLoaded);
+var loader = new BufferLoader(context, ['jump.mp3', 'wall.mp3'], onLoaded);
 
 function onLoaded(buffers) {
     context.buffers = buffers;

@@ -1,20 +1,11 @@
 # high priority
 
-* amplify for emscripten audio
 * debug rodio
-* sound choice
-* android
 * emscripten finish stuff
   update to 8.0
   solve hdpi:
     see if it is soft_fullscreen related if so then make a comment in the documentation
     if not then try to solve with set strategy ? or force 1.0 for hdpi
-
-* sounds with sf2
-* touch events and only it
-* map
-
-* yellow gong for reward and its sound?
 
 # low priority
 

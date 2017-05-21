@@ -21,16 +21,8 @@ impl Audio {
     }
 
     pub fn play_jump(&self) {
-        unsafe {
-            let vol = CFG.audio.jump_volume
-            emscripten_asm_const(format!(b"play_jump({})", vol) as *const u8);
-        }
     }
 
     pub fn play_wall(&self, vol: f32) {
-        unsafe {
-            let vol = vol*CFG.audio.wall_volume
-            emscripten_asm_const(format!(b"play_wall({})", vol) as *const u8);
-        }
     }
 }
