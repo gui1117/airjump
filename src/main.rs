@@ -86,10 +86,6 @@ fn safe_main() -> Result<(), String> {
 
     let window = builder.build_glium().map_err(|e| format!("build glium: {}", e))?;
 
-    let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
-    let mut cursor = [w as f64/2., h as f64/2.];
-    window.get_window().unwrap().set_cursor_position(cursor[0] as i32, cursor[1] as i32).unwrap();
-    window.get_window().unwrap().set_cursor_state(glutin::CursorState::Hide).unwrap();
     let mut graphics = graphics::Graphics::new(&window).map_err(|e| format!("graphics: {}", e))?;
 
     let audio = audio::Audio::new().map_err(|e| format!("audio: {}", e))?;
@@ -100,41 +96,9 @@ fn safe_main() -> Result<(), String> {
     set_main_loop(|dt| -> bool {
         for event in window.poll_events() {
             use glium::glutin::Event::*;
-            use glium::glutin::ElementState;
-            use glium::glutin::MouseButton;
             use glium::glutin::TouchPhase;
             match event {
                 Closed => return true,
-                MouseMoved(x, y) => {
-                    if CFG.gameplay.set_mouse {
-                        if cfg!(target_os = "emscripten") {
-                            let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
-                            let ratio = w as f64 / h as f64;
-                            cursor[0] = ((x as f64 / w as f64) - 0.5) * 2.;
-                            cursor[1] = - ((y as f64 / h as f64) - 0.5) * 2.;
-                            cursor[0] = f64::max(-1., f64::min(cursor[0], 1.));
-                            cursor[1] = f64::max(-1./ratio, f64::min(cursor[1], 1./ratio));
-                            app.set_jump_angle(cursor[1].atan2(cursor[0]) + ::std::f64::consts::PI);
-                        } else {
-                            let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
-                            if let Ok(()) = window.get_window().unwrap().set_cursor_position((w/2) as i32, (h/2) as i32) {
-
-                                let dx = x - (w/2) as i32;
-                                let dy = y - (h/2) as i32;
-
-                                if dx != 0 || dy != 0 {
-                                    cursor[0] += dx as f64 * CFG.control.mouse_sensibility;
-                                    cursor[1] += -dy as f64 * CFG.control.mouse_sensibility;
-
-                                    let ratio = w as f64 / h as f64;
-                                    cursor[0] = f64::max(-1., f64::min(cursor[0], 1.));
-                                    cursor[1] = f64::max(-1./ratio, f64::min(cursor[1], 1./ratio));
-                                    app.set_jump_angle(cursor[1].atan2(cursor[0]) + ::std::f64::consts::PI);
-                                }
-                            }
-                        }
-                    }
-                },
                 Touch(touch) => {
                     if touch.phase == TouchPhase::Started {
                         let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
@@ -144,12 +108,6 @@ fn safe_main() -> Result<(), String> {
                         app.do_jump();
                     }
                 },
-                MouseInput(ElementState::Pressed, MouseButton::Left) => if CFG.gameplay.set_mouse {
-                    app.do_jump();
-                },
-                MouseInput(ElementState::Pressed, MouseButton::Right) => if CFG.gameplay.set_mouse && CFG.gameplay.set_unlimited {
-                    app.do_unlimited_jump();
-                },
                 Refresh => {
                     let mut target = window.draw();
                     {
@@ -157,9 +115,6 @@ fn safe_main() -> Result<(), String> {
                         let mut frame = graphics::Frame::new(&mut graphics, &mut target, &camera);
                         frame.clear();
                         app.draw(&mut frame);
-                        if CFG.gameplay.set_mouse {
-                            draw_cursor(cursor, &mut frame);
-                        }
                     }
                     target.finish().unwrap();
                 }
@@ -175,7 +130,6 @@ fn safe_main() -> Result<(), String> {
             let mut frame = graphics::Frame::new(&mut graphics, &mut target, &camera);
             frame.clear();
             app.draw(&mut frame);
-            draw_cursor(cursor, &mut frame);
         }
         target.finish().unwrap();
 
@@ -217,40 +171,4 @@ fn set_main_loop<F: FnMut(f64) -> bool>(mut main_loop: F) {
         }
         fps_clock.tick();
     }
-}
-
-fn draw_cursor(cursor: [f64; 2], frame: &mut graphics::Frame) {
-    use graphics::{self, Layer, Transformed};
-    let (w, h) = frame.size();
-
-    let unit = f32::min(w as f32, h as f32);
-
-    let color = CFG.graphics.cursor_color;
-    let half_width = (CFG.graphics.cursor_outer_radius - CFG.graphics.cursor_inner_radius)/2. * unit;
-    let half_height = CFG.graphics.cursor_thickness/2. * unit;
-    let delta = CFG.graphics.cursor_inner_radius * unit + half_width;
-
-    let transform = graphics::Transformation::identity()
-        .translate(cursor[0] as f32, cursor[1] as f32)
-        .translate(delta, 0.)
-        .scale(half_width, half_height);
-    frame.draw_quad(transform, Layer::Billboard, color);
-
-    let transform = graphics::Transformation::identity()
-        .translate(cursor[0] as f32, cursor[1] as f32)
-        .translate(-delta, 0.)
-        .scale(half_width, half_height);
-    frame.draw_quad(transform, Layer::Billboard, color);
-
-    let transform = graphics::Transformation::identity()
-        .translate(cursor[0] as f32, cursor[1] as f32)
-        .translate(0., delta)
-        .scale(half_height, half_width);
-    frame.draw_quad(transform, Layer::Billboard, color);
-
-    let transform = graphics::Transformation::identity()
-        .translate(cursor[0] as f32, cursor[1] as f32)
-        .translate(0., -delta)
-        .scale(half_height, half_width);
-    frame.draw_quad(transform, Layer::Billboard, color);
 }

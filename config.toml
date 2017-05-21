@@ -18,8 +18,6 @@ impulse = 25.0
 reset = true
 damping = 0.5
 ball_radius = 0.5
-set_mouse = false
-set_unlimited = false
 
 [camera]
 zoom = 0.03
