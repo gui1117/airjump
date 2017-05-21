@@ -1,6 +1,4 @@
-use configuration::CFG;
-
-extern "C" { fn emscripten_asm_const(code: *const ::std::os::raw::c_char); }
+// extern "C" { fn emscripten_asm_const(code: *const ::std::os::raw::c_char); }
 
 pub struct Audio {
 }
@@ -23,6 +21,6 @@ impl Audio {
     pub fn play_jump(&self) {
     }
 
-    pub fn play_wall(&self, vol: f32) {
+    pub fn play_wall(&self, _vol: f32) {
     }
 }
