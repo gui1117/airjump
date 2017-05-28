@@ -1,6 +1,6 @@
 # airjump
 
-a game in very early development
+a game
 
 ## License
 
