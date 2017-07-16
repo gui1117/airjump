@@ -10,19 +10,19 @@ exclude_all = [] # exclude map.svg and config.toml from the binary
 [dependencies]
 serde = "1.0"
 serde_derive = "1.0"
-toml = "*"
-lazy_static = "*"
-glium = "*"
-svgparser = "*"
-fnv = "*"
-time = "*"
-fps_clock = "*"
-vecmath = "*"
-libc = "*"
+toml = "0.4"
+lazy_static = "0.2"
+glium = "0.16"
+svgparser = "0.4"
+fnv = "1.0"
+time = "0.1"
+fps_clock = "1.0"
+vecmath = "0.3"
+libc = "0.2"
 
 [target.'cfg(not(target_os = "emscripten"))'.dependencies]
-rodio = "*"
+rodio = "0.5"
 
-[replace]
-"glutin:0.7.4" = { git = 'https://github.com/thiolliere/glutin', branch = '0.7.4' }
+# [replace]
+# "glutin:0.7.4" = { git = 'https://github.com/thiolliere/glutin', branch = '0.7.4' }
 # "glutin:0.7.4" = { path = "../glutin" }
