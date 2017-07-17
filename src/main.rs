@@ -23,7 +23,7 @@ pub mod emscripten;
 
 use configuration::CFG;
 
-use glium::{glutin, DisplayBuild};
+use glium::glutin;
 
 pub trait OkOrExit {
     type OkType;
@@ -49,43 +49,30 @@ fn main() {
 
 fn safe_main() -> Result<(), String> {
     configure_fullscreen_strategy();
-    let mut builder = glutin::WindowBuilder::new()
+    let mut window_builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
 
-    let (fullscreen, dimensions, vsync, samples) = if cfg!(target_os = "emscripten") {
-        (
-            false,
-            None,
-            true,
-            2,
-        )
+    if cfg!(target_os = "emscripten") {
     } else {
-        (
-            CFG.window.fullscreen,
-            Some(CFG.window.dimensions),
-            CFG.window.vsync,
-            CFG.window.samples,
-        )
+        if CFG.window.fullscreen {
+            window_builder = window_builder.with_fullscreen(glutin::get_primary_monitor());
+        } else {
+            let width = CFG.window.dimensions[0];
+            let height = CFG.window.dimensions[1];
+            window_builder = window_builder.with_dimensions(width, height);
+        }
     };
 
-    if fullscreen {
-        builder = builder.with_fullscreen(glutin::get_primary_monitor());
-    } else if let Some(dimensions) = dimensions {
-        let width = dimensions[0];
-        let height = dimensions[1];
-        builder = builder.with_dimensions(width, height);
-    }
-    if vsync {
-        builder = builder.with_vsync();
-    }
-    if samples > 0 && samples.is_power_of_two() {
-        builder = builder.with_multisampling(samples as u16);
-    } else {
-        panic!("multisampling invalid");
-    }
+    let mut context_builder = glutin::ContextBuilder::new();
 
-    let window = builder.build_glium().map_err(|e| format!("build glium: {}", e))?;
+    context_builder = context_builder.with_vsync(CFG.window.vsync);
+    context_builder = context_builder.with_multisampling(CFG.window.samples as u16);
+
+    let mut events_loop = glutin::EventsLoop::new();
+
+    let window = glium::Display::new(window_builder, context_builder, &events_loop)
+        .map_err(|e| format!("build glium: {}", e))?;
 
     let mut graphics = graphics::Graphics::new(&window).map_err(|e| format!("graphics: {}", e))?;
 
@@ -95,21 +82,22 @@ fn safe_main() -> Result<(), String> {
 
     // return whereas main loop breaks
     set_main_loop(|dt| -> bool {
-        for event in window.poll_events() {
+        events_loop.poll_events(|event| {
             use glium::glutin::Event::*;
+            use glium::glutin::WindowEvent::*;
             use glium::glutin::TouchPhase;
             match event {
-                Closed => return true,
-                Touch(touch) => {
+                WindowEvent { event: Closed, .. } => app.must_quit = true,
+                WindowEvent { event: Touch(touch), .. } => {
                     if touch.phase == TouchPhase::Started {
-                        let (w, h) = window.get_window().unwrap().get_inner_size_points().unwrap();
+                        let (w, h) = window.gl_window().get_inner_size_points().unwrap();
                         let x = touch.location.0 - (w/2) as f64;
                         let y = - (touch.location.1 - (h/2) as f64);
                         app.set_jump_angle(y.atan2(x) + ::std::f64::consts::PI);
                         app.do_jump();
                     }
                 },
-                Refresh => {
+                WindowEvent { event: Refresh, .. } => {
                     let mut target = window.draw();
                     {
                         let camera = app.camera();
@@ -121,7 +109,7 @@ fn safe_main() -> Result<(), String> {
                 }
                 _ => (),
             }
-        }
+        });
 
         app.update(dt);
 

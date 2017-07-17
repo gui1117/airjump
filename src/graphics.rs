@@ -2,7 +2,7 @@ extern crate vecmath;
 
 use glium::{self, Blend, Surface, VertexBuffer, index, vertex, Program, DrawParameters, Depth, DepthTest};
 use glium::backend::{Facade, Context};
-use glium::backend::glutin_backend::GlutinFacade;
+use glium::Display;
 use glium::program::ProgramChooserCreationError;
 
 use std::error::Error;
@@ -133,7 +133,7 @@ impl From<vertex::BufferCreationError> for GraphicsError {
 }
 
 impl Graphics {
-    pub fn new(facade: &GlutinFacade) -> Result<Graphics, GraphicsError> {
+    pub fn new(facade: &Display) -> Result<Graphics, GraphicsError> {
         let quad_vertex = vec![Vertex { position: [-1., -1.] },
                                Vertex { position: [1., -1.] },
                                Vertex { position: [-1., 1.] },
