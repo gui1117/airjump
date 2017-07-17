@@ -77,6 +77,10 @@ impl Context {
     pub fn get_pixel_format(&self) -> PixelFormat {
         self.egl_context.get_pixel_format()
     }
+
+    #[inline]
+    pub fn resize(&self, width: u32, height: u32) {
+    }
 }
 
 pub struct HeadlessContext(EglContext);
