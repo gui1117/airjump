@@ -107,7 +107,7 @@ fn safe_main() -> Result<(), String> {
                     }
                     target.finish().unwrap();
                 }
-                _ => (),
+                a @ _ => println!("{:?}", a),
             }
         });
 
