@@ -2,8 +2,12 @@ extern crate svgparser;
 
 use self::svgparser::svg;
 use self::svgparser::Tokenize;
+use self::svgparser::ElementId;
+use self::svgparser::AttributeId;
+use self::svgparser::svg::ElementEnd;
 use physics::{Body, Shape};
 use OkOrExit;
+
 
 pub struct Map {
     pub bodies: Vec<Body>,
@@ -73,14 +77,14 @@ fn load_map() -> Result<Map, Error> {
     let mut rect: Option<(Option<f64>,Option<f64>,Option<f64>,Option<f64>)> = None;
 
     loop {
-        use self::svgparser::ElementId;
-        use self::svgparser::AttributeId;
-        use self::svgparser::svg::ElementEnd::Empty;
-
-        match parser.parse_next()? {
+        let next = parser.parse_next();
+        if let Err(svgparser::Error::EndOfStream) = next {
+            break;
+        }
+        match next? {
             svg::Token::SvgElementStart(ElementId::Circle) => circle = Some((false, None, None, None)),
             svg::Token::SvgElementStart(ElementId::Rect) => rect = Some((None, None, None, None)),
-            svg::Token::ElementEnd(Empty) => {
+            svg::Token::ElementEnd(ElementEnd::Empty) => {
                 if let Some(circle) = circle.take() {
                     match circle {
                         (true, Some(x), Some(y), _) => {
@@ -145,7 +149,6 @@ fn load_map() -> Result<Map, Error> {
                     rect.3 = Some(value.slice().parse()?);
                 }
             },
-            svg::Token::EndOfStream => break,
             _ => (),
         }
     }
