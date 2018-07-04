@@ -65,7 +65,7 @@ fn read_snd_files() -> Result<(&'static [u8], &'static [u8]), Error> {
 }
 
 pub struct Audio {
-    endpoint: rodio::Endpoint,
+    endpoint: rodio::Device,
     wall: Buffered<Amplify<Decoder<io::Cursor<FileType>>>>,
     jump: Buffered<Amplify<Decoder<io::Cursor<FileType>>>>,
 }
@@ -74,7 +74,7 @@ impl Audio {
     pub fn new() -> Result<Audio, Error> {
         let snds = read_snd_files()?;
         Ok(Audio {
-            endpoint: rodio::get_default_endpoint().ok_or(Error::NoEndpoint)?,
+            endpoint: rodio::default_output_device().ok_or(Error::NoEndpoint)?,
             wall: Decoder::new(io::Cursor::new(snds.0))?
                 .amplify(CFG.audio.wall_volume)
                 .buffered(),

@@ -13,17 +13,11 @@ serde = "1.0"
 serde_derive = "1.0"
 toml = "0.4"
 lazy_static = "1"
-glium = "0.17"
-svgparser = "0.5"
+glium = "0.21"
+svgparser = "0.8"
 fnv = "1.0"
 time = "0.1"
 fps_clock = "2"
 vecmath = "0.3"
 libc = "0.2"
-
-[target.'cfg(not(target_os = "emscripten"))'.dependencies]
-rodio = "0.5"
-
-[replace]
-# "glutin:0.7.4" = { git = 'https://github.com/thiolliere/glutin', branch = '0.7.4' }
-"glutin:0.9.1" = { git = 'https://github.com/thiolliere/glutin', branch = 'android' }
+rodio = "0.8"

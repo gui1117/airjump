@@ -49,6 +49,8 @@ fn main() {
 
 fn safe_main() -> Result<(), String> {
     configure_fullscreen_strategy();
+
+    let mut events_loop = glutin::EventsLoop::new();
     let mut window_builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
@@ -56,7 +58,7 @@ fn safe_main() -> Result<(), String> {
     if cfg!(target_os = "emscripten") {
     } else {
         if CFG.window.fullscreen {
-            window_builder = window_builder.with_fullscreen(glutin::get_primary_monitor());
+            window_builder = window_builder.with_fullscreen(Some(events_loop.get_primary_monitor()));
         } else {
             let width = CFG.window.dimensions[0];
             let height = CFG.window.dimensions[1];
@@ -68,8 +70,6 @@ fn safe_main() -> Result<(), String> {
 
     context_builder = context_builder.with_vsync(CFG.window.vsync);
     context_builder = context_builder.with_multisampling(CFG.window.samples as u16);
-
-    let mut events_loop = glutin::EventsLoop::new();
 
     let window = glium::Display::new(window_builder, context_builder, &events_loop)
         .map_err(|e| format!("build glium: {}", e))?;
@@ -107,7 +107,7 @@ fn safe_main() -> Result<(), String> {
                     }
                     target.finish().unwrap();
                 }
-                a @ _ => println!("{:?}", a),
+                _ => (),
             }
         });
 

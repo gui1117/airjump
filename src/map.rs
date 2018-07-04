@@ -1,13 +1,12 @@
 extern crate svgparser;
 
 use self::svgparser::svg;
-use self::svgparser::Tokenize;
 use self::svgparser::ElementId;
 use self::svgparser::AttributeId;
 use self::svgparser::svg::ElementEnd;
 use physics::{Body, Shape};
 use OkOrExit;
-
+use self::svgparser::xmlparser::FromSpan;
 
 pub struct Map {
     pub bodies: Vec<Body>,
@@ -18,7 +17,7 @@ const MAP_FILE: &'static str = "map.svg";
 
 enum Error {
     Io(::std::io::Error),
-    Svg(svgparser::Error),
+    Svg(svgparser::xmlparser::Error),
     ParseFloat(::std::num::ParseFloatError),
 }
 impl From<::std::io::Error> for Error {
@@ -26,8 +25,8 @@ impl From<::std::io::Error> for Error {
         Error::Io(err)
     }
 }
-impl From<svgparser::Error> for Error {
-    fn from(err: svgparser::Error) -> Error {
+impl From<svgparser::xmlparser::Error> for Error {
+    fn from(err: svgparser::xmlparser::Error) -> Error {
         Error::Svg(err)
     }
 }
@@ -41,8 +40,8 @@ impl ::std::fmt::Display for Error {
         use self::Error::*;
         match *self {
             Io(ref e) => write!(fmt, "file `{}`: io error: {}", MAP_FILE, e),
-            Svg(ref e) => write!(fmt, "file `{}`: svg parser error: {:?}", MAP_FILE, e),
-            ParseFloat(ref e) => write!(fmt, "file `{}`: svg parser float error: {:?}", MAP_FILE, e),
+            Svg(ref e) => write!(fmt, "file `{}`: svg parser error: {}", MAP_FILE, e),
+            ParseFloat(ref e) => write!(fmt, "file `{}`: svg parser float error: {}", MAP_FILE, e),
         }
     }
 }
@@ -64,7 +63,7 @@ fn read_map_file() -> Result<&'static str, Error> {
 fn load_map() -> Result<Map, Error> {
     let text = read_map_file()?;
 
-    let mut parser = svg::Tokenizer::from_str(&text);
+    let parser = svg::Tokenizer::from_str(&text);
 
     let mut bodies = Vec::new();
 
@@ -76,14 +75,10 @@ fn load_map() -> Result<Map, Error> {
     // f64 are x, y, width, height
     let mut rect: Option<(Option<f64>,Option<f64>,Option<f64>,Option<f64>)> = None;
 
-    loop {
-        let next = parser.parse_next();
-        if let Err(svgparser::Error::EndOfStream) = next {
-            break;
-        }
+    for next in parser {
         match next? {
-            svg::Token::SvgElementStart(ElementId::Circle) => circle = Some((false, None, None, None)),
-            svg::Token::SvgElementStart(ElementId::Rect) => rect = Some((None, None, None, None)),
+            svg::Token::ElementStart(svg::QName { local: svg::Name::Svg(ElementId::Circle), .. }) => circle = Some((false, None, None, None)),
+            svg::Token::ElementStart(svg::QName { local: svg::Name::Svg(ElementId::Rect), .. }) => rect = Some((None, None, None, None)),
             svg::Token::ElementEnd(ElementEnd::Empty) => {
                 if let Some(circle) = circle.take() {
                     match circle {
@@ -109,44 +104,44 @@ fn load_map() -> Result<Map, Error> {
                     }
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::Id, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::Id), .. }, value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.0 = value.slice() == "start";
+                    circle.0 = value.to_str() == "start";
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::Cx, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::Cx), .. }, value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.1 = Some(value.slice().parse()?);
+                    circle.1 = Some(value.to_str().parse()?);
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::Cy, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::Cy), .. }, value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.2 = Some(-value.slice().parse()?);
+                    circle.2 = Some(-value.to_str().parse()?);
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::R, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::R), .. }, value) => {
                 if let Some(ref mut circle) = circle {
-                    circle.3 = Some(value.slice().parse()?);
+                    circle.3 = Some(value.to_str().parse()?);
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::X, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::X), .. }, value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.0 = Some(value.slice().parse()?);
+                    rect.0 = Some(value.to_str().parse()?);
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::Y, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::Y), .. }, value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.1 = Some(-value.slice().parse()?);
+                    rect.1 = Some(-value.to_str().parse()?);
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::Width, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::Width), .. }, value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.2 = Some(value.slice().parse()?);
+                    rect.2 = Some(value.to_str().parse()?);
                 }
             },
-            svg::Token::SvgAttribute(AttributeId::Height, value) => {
+            svg::Token::Attribute(svg::QName { local: svg::Name::Svg(AttributeId::Height), .. }, value) => {
                 if let Some(ref mut rect) = rect {
-                    rect.3 = Some(value.slice().parse()?);
+                    rect.3 = Some(value.to_str().parse()?);
                 }
             },
             _ => (),
