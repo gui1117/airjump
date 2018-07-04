@@ -7,11 +7,6 @@ extern crate serde;
 mod spatial_hashing;
 mod configuration;
 pub mod math;
-#[cfg(target_os = "emscripten")]
-#[path="emscripten_audio.rs"]
-mod audio;
-#[cfg(all(not(target_os = "emscripten")))]
-#[path="rodio_audio.rs"]
 mod audio;
 mod app;
 mod map;
