@@ -2,6 +2,7 @@
 name = "airjump"
 version = "0.1.0"
 authors = ["thiolliere <guillaume.thiolliere@opmbx.org>"]
+license = "MIT/Apache-2.0"
 
 [features]
 default = []
