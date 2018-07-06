@@ -1,14 +1,13 @@
 check:
-	cargo check --target asmjs-unknown-emscripten --release
+	cargo check --target asmjs-unknown-emscripten
 
 build:
+	mkdir -p target/publication/html/
 	rm -rf target/publication/html/*
-	cargo build --target asmjs-unknown-emscripten --release
-	cp target/asmjs-unknown-emscripten/release/airjump.js target/publication/html/
+	cargo build --target wasm32-unknown-emscripten --release
+	cp target/wasm32-unknown-emscripten/release/airjump.wasm target/publication/html/
+	cp target/wasm32-unknown-emscripten/release/airjump.js target/publication/html/
 	cp release.html target/publication/html/index.html
-	# cp src/emscripten_audio.js target/publication/html/emscripten_audio.js
-	# cp sounds/jump.mp3 target/publication/html/
-	# cp sounds/wall.mp3 target/publication/html/
 
 run: build
 	firefox target/publication/html/index.html
@@ -18,10 +17,6 @@ publish_itch: build
 
 publish_thiolliere: build
 	scp target/publication/html/* root@thiolliere.org:/var/www/html/airjump/
-
-doc:
-	cargo doc --open &
-	rustup doc
 
 # android_log:
 # 	~/android-sdk-linux/platform-tools/adb logcat | grep -ie AndroidGLue

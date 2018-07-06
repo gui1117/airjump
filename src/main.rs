@@ -11,7 +11,6 @@ mod audio;
 mod app;
 mod map;
 mod physics;
-pub mod backtrace_hack;
 pub mod graphics;
 #[cfg(target_os = "emscripten")]
 pub mod emscripten;

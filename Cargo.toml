@@ -20,4 +20,8 @@ time = "0.1"
 fps_clock = "2"
 vecmath = "0.3"
 libc = "0.2"
-rodio = "0.8"
+
+[dependencies.rodio]
+version = "0.8"
+default-features = false
+features = ["flac", "vorbis", "wav"]
