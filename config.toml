@@ -1,8 +1,8 @@
 [window]
 samples = 2
-fullscreen = true
+fullscreen = false
 vsync = true
-dimensions = [640, 480]
+dimensions = [800, 600]
 
 [audio]
 jump_volume = 1.0
