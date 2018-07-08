@@ -8,9 +8,9 @@ mod spatial_hashing;
 mod configuration;
 pub mod math;
 #[cfg(target_os= "emscripten")]
+#[path="dummy_audio.rs"]
 mod audio;
 #[cfg(not(target_os= "emscripten"))]
-#[path="dummy_audio.rs"]
 mod audio;
 mod app;
 mod map;

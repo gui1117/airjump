@@ -1,9 +1,7 @@
-pub struct Error;
-
 pub struct Audio;
 
 impl Audio {
-    pub fn new() -> Result<Audio, Error> {
+    pub fn new() -> Result<Audio, String> {
         Ok(Audio)
     }
 

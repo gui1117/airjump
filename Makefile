@@ -1,22 +1,11 @@
-check:
-	cargo check --target asmjs-unknown-emscripten
-
 build:
-	mkdir -p target/publication/html/
-	rm -rf target/publication/html/*
-	cargo build --target wasm32-unknown-emscripten --release
-	cp target/wasm32-unknown-emscripten/release/airjump.wasm target/publication/html/
-	cp target/wasm32-unknown-emscripten/release/airjump.js target/publication/html/
-	cp release.html target/publication/html/index.html
-
-run: build
-	firefox target/publication/html/index.html
+	cargo web deploy --release --target wasm32-unknown-emscripten
 
 publish_itch: build
-	butler push target/publication/html/ rope/airjump:html
+	butler push target/deploy/ rope/airjump:html
 
 publish_thiolliere: build
-	scp target/publication/html/* root@thiolliere.org:/var/www/html/airjump/
+	scp target/deploy/* root@thiolliere.org:/var/www/html/airjump/
 
 # android_log:
 # 	~/android-sdk-linux/platform-tools/adb logcat | grep -ie AndroidGLue
