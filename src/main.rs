@@ -7,6 +7,10 @@ extern crate serde;
 mod spatial_hashing;
 mod configuration;
 pub mod math;
+#[cfg(target_os= "emscripten")]
+mod audio;
+#[cfg(not(target_os= "emscripten"))]
+#[path="dummy_audio.rs"]
 mod audio;
 mod app;
 mod map;
@@ -37,28 +41,22 @@ impl<T, E: ::std::fmt::Display> OkOrExit for Result<T,E> {
 }
 
 fn main() {
-    std::env::set_var("RUSTC_BACKTRACE", "1");
     safe_main().ok_or_exit();
 }
 
 fn safe_main() -> Result<(), String> {
-    configure_fullscreen_strategy();
-
     let mut events_loop = glutin::EventsLoop::new();
     let mut window_builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
 
-    if cfg!(target_os = "emscripten") {
+    if CFG.window.fullscreen {
+        window_builder = window_builder.with_fullscreen(Some(events_loop.get_primary_monitor()));
     } else {
-        if CFG.window.fullscreen {
-            window_builder = window_builder.with_fullscreen(Some(events_loop.get_primary_monitor()));
-        } else {
-            let width = CFG.window.dimensions[0];
-            let height = CFG.window.dimensions[1];
-            window_builder = window_builder.with_dimensions(width, height);
-        }
-    };
+        let width = CFG.window.dimensions[0];
+        let height = CFG.window.dimensions[1];
+        window_builder = window_builder.with_dimensions(width, height);
+    }
 
     let mut context_builder = glutin::ContextBuilder::new();
 
@@ -120,15 +118,6 @@ fn safe_main() -> Result<(), String> {
     });
 
     Ok(())
-}
-
-#[cfg(target_os = "emscripten")]
-fn configure_fullscreen_strategy() {
-    emscripten::request_soft_fullscreen_strategy();
-}
-
-#[cfg(not(target_os = "emscripten"))]
-fn configure_fullscreen_strategy() {
 }
 
 #[cfg(target_os = "emscripten")]
