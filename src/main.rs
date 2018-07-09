@@ -66,12 +66,16 @@ fn safe_main() -> Result<(), String> {
 
     let mut app = app::App::new(audio);
 
+    let mut last_set_inner_size = (0, 0);
     // return whereas main loop breaks
     set_main_loop(|dt| -> bool {
         {
             let w = js!{ return window.innerWidth; }.try_into().unwrap();
             let h = js!{ return window.innerHeight; }.try_into().unwrap();
-            window.gl_window().set_inner_size(w, h);
+            if last_set_inner_size != (w, h) {
+                last_set_inner_size = (w, h);
+                window.gl_window().set_inner_size(w, h);
+            }
         }
         events_loop.poll_events(|event| {
             use glium::glutin::Event::*;
