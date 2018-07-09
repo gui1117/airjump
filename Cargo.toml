@@ -20,6 +20,7 @@ time = "0.1"
 fps_clock = "2"
 vecmath = "0.3"
 libc = "0.2"
+stdweb = "0.4"
 
 [dependencies.rodio]
 version = "0.8"

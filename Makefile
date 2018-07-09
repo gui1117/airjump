@@ -1,11 +1,9 @@
 build:
-	cargo web deploy --release --target wasm32-unknown-emscripten
+	cargo web deploy --release
+	cp release.html target/deploy/index.html
 
 publish_itch: build
 	butler push target/deploy/ rope/airjump:html
-
-publish_thiolliere: build
-	scp target/deploy/* root@thiolliere.org:/var/www/html/airjump/
 
 # android_log:
 # 	~/android-sdk-linux/platform-tools/adb logcat | grep -ie AndroidGLue

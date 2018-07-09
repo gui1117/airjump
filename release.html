@@ -63,15 +63,10 @@ canvas.emscripten {
 }
 		</style>
 	</head>
-	<body onresize="resize_canvas()">
+	<body>
 		<div id="spinner"></div>
 		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 		<script type='text/javascript'>
-function resize_canvas() {
-	var canvas = document.getElementById("canvas");
-	canvas.width  = window.innerWidth;
-	canvas.height = window.innerHeight;
-}
 var spinnerElement = document.getElementById('spinner');
 var Module = {
 	preRun: [],

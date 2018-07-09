@@ -22,9 +22,7 @@ pub struct Control {
 #[derive(Deserialize)]
 pub struct Window {
     pub samples: u8,
-    pub fullscreen: bool,
     pub vsync: bool,
-    pub dimensions: [u32; 2],
 }
 #[derive(Deserialize)]
 pub struct Gameplay {

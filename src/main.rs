@@ -3,6 +3,8 @@ extern crate fps_clock;
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate serde_derive;
 extern crate serde;
+#[macro_use]
+extern crate stdweb;
 
 mod spatial_hashing;
 mod configuration;
@@ -20,7 +22,7 @@ pub mod graphics;
 pub mod emscripten;
 
 use configuration::CFG;
-
+use stdweb::unstable::TryInto;
 use glium::glutin;
 
 pub trait OkOrExit {
@@ -46,17 +48,9 @@ fn main() {
 
 fn safe_main() -> Result<(), String> {
     let mut events_loop = glutin::EventsLoop::new();
-    let mut window_builder = glutin::WindowBuilder::new()
+    let window_builder = glutin::WindowBuilder::new()
         .with_multitouch()
         .with_title("airjump");
-
-    if CFG.window.fullscreen {
-        window_builder = window_builder.with_fullscreen(Some(events_loop.get_primary_monitor()));
-    } else {
-        let width = CFG.window.dimensions[0];
-        let height = CFG.window.dimensions[1];
-        window_builder = window_builder.with_dimensions(width, height);
-    }
 
     let mut context_builder = glutin::ContextBuilder::new();
 
@@ -74,6 +68,11 @@ fn safe_main() -> Result<(), String> {
 
     // return whereas main loop breaks
     set_main_loop(|dt| -> bool {
+        {
+            let w = js!{ return window.innerWidth; }.try_into().unwrap();
+            let h = js!{ return window.innerHeight; }.try_into().unwrap();
+            window.gl_window().set_inner_size(w, h);
+        }
         events_loop.poll_events(|event| {
             use glium::glutin::Event::*;
             use glium::glutin::WindowEvent::*;
@@ -82,7 +81,7 @@ fn safe_main() -> Result<(), String> {
                 WindowEvent { event: Closed, .. } => app.must_quit = true,
                 WindowEvent { event: Touch(touch), .. } => {
                     if touch.phase == TouchPhase::Started {
-                        let (w, h) = window.gl_window().get_inner_size_points().unwrap();
+                        let (w, h) = window.gl_window().get_inner_size().unwrap();
                         let x = touch.location.0 - (w/2) as f64;
                         let y = - (touch.location.1 - (h/2) as f64);
                         app.set_jump_angle(y.atan2(x) + ::std::f64::consts::PI);

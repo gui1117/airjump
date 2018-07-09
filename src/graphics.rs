@@ -266,6 +266,7 @@ impl<'a> Frame<'a> {
     }
 
     pub fn size(&self) -> (u32, u32) {
+        println!("size: {:?}", self.graphics.context.get_framebuffer_dimensions());
         self.graphics.context.get_framebuffer_dimensions()
     }
 

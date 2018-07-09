@@ -16,7 +16,7 @@ pub fn set_main_loop_callback<F>(callback : F) where F : FnMut() {
         *log.borrow_mut() = &callback as *const _ as *mut c_void;
     });
 
-    unsafe { emscripten_set_main_loop(wrapper::<F>, 0, 1); }
+    unsafe { emscripten_set_main_loop(wrapper::<F>, 60, 1); }
 
     unsafe extern "C" fn wrapper<F>() where F : FnMut() {
         MAIN_LOOP_CALLBACK.with(|z| {
